@@ -3,8 +3,9 @@ import { useLang } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import { getElementDef } from "../../elements/registry";
 import { computeLayout } from "./renderer";
-import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_TITLE, CSV_SVG_WRAP, THEME_SELECT, EXPORT_BTN } from "./styles";
+import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_TITLE, CSV_CONTROLS, CSV_SVG_WRAP, THEME_SELECT, EXPORT_BTN } from "./styles";
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export type SvgTheme = "full" | "color-labels" | "color-only" | "bw-pattern" | "bw-labels" | "outline";
 
@@ -80,24 +81,33 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
   return (
     <div className={CROSS_SECTION_VIEW}>
       <div className={CSV_HEADER}>
-        <span className={CSV_TITLE}>{street.name}</span>
-
-        <select
-          className={THEME_SELECT}
-          value={theme}
-          onChange={(e) => setTheme(e.target.value as SvgTheme)}
-        >
-          {THEMES.map((th) => (
-            <option key={th.value} value={th.value}>{th.label[lang]}</option>
-          ))}
-        </select>
-
-        <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng}>PNG</Button>
-        <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg}>SVG</Button>
-        <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportJson}>JSON</Button>
+        {street.name && <span className={CSV_TITLE}>{street.name}</span>}
+        <div className={CSV_CONTROLS}>
+          <select
+            className={THEME_SELECT}
+            value={theme}
+            onChange={(e) => setTheme(e.target.value as SvgTheme)}
+          >
+            {THEMES.map((th) => (
+              <option key={th.value} value={th.value}>{th.label[lang]}</option>
+            ))}
+          </select>
+          <div className="flex items-center gap-1 ml-auto">
+            <span className="text-xs text-muted-foreground mr-1">{lang === "de" ? "Exportieren" : "Export"}</span>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng}>
+              <Download size={11} />PNG
+            </Button>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg}>
+              <Download size={11} />SVG
+            </Button>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportJson}>
+              <Download size={11} />JSON
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <div className={`${CSV_SVG_WRAP} flex justify-center`}>
+      <div className={CSV_SVG_WRAP}>
         {W === 0 ? (
           <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
             Add elements in the Design tab.

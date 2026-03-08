@@ -97,7 +97,7 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
 
       {/* Documentation modal */}
       {docsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setDocsOpen(false)}>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/40" onClick={() => setDocsOpen(false)}>
           <div className="relative bg-background rounded-lg border border-border shadow-lg p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
             <button className="absolute top-3 right-3 text-muted-foreground hover:text-foreground" onClick={() => setDocsOpen(false)}>
               <X size={16} />

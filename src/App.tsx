@@ -98,7 +98,7 @@ export default function App() {
           <div className="flex flex-1 flex-col overflow-hidden">
             <PanelGroup orientation="vertical">
               <Panel defaultSize={40} minSize={20}>
-                <div className="h-full overflow-y-auto flex items-center justify-center">
+                <div className="h-full overflow-y-auto">
                   <CrossSectionView street={street} highlightedIds={highlightedIds} />
                 </div>
               </Panel>
