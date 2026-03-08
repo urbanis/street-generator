@@ -356,21 +356,19 @@ export function ExploreTab({
 
       {osmError && <div className={ERROR_BOX}>{osmError}</div>}
 
-      {/* Mapillary embed + Street View link */}
+      {/* Street imagery links */}
       {mapReference && (
         <div className="flex flex-col gap-1 mt-1">
           <span className="text-xs text-muted-foreground">{t("mapillaryLabel")}</span>
-          <iframe
-            title="Mapillary"
-            src={
-              `https://www.mapillary.com/embed?map_style=Mapillary+light` +
-              `&image_lat=${mapReference.lat}&image_lng=${mapReference.lng}` +
-              `&traffic_sign_layer=false&map_layer=traffic_signs&style=photo`
-            }
-            className="w-full rounded border border-border"
-            style={{ height: 160 }}
-            allowFullScreen
-          />
+          <a
+            href={`https://www.mapillary.com/app/?lat=${mapReference.lat}&lng=${mapReference.lng}&z=17`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded border border-border px-2 py-1.5 text-xs hover:bg-muted"
+          >
+            <ExternalLink size={11} className="shrink-0 text-muted-foreground" />
+            <span>Mapillary</span>
+          </a>
           <a
             href={
               `https://www.google.com/maps/@${mapReference.lat},${mapReference.lng}` +
@@ -378,10 +376,10 @@ export function ExploreTab({
             }
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-xs text-primary hover:underline"
+            className="flex items-center gap-2 rounded border border-border px-2 py-1.5 text-xs hover:bg-muted"
           >
-            <ExternalLink size={11} />
-            {t("streetViewLink")}
+            <ExternalLink size={11} className="shrink-0 text-muted-foreground" />
+            <span>{t("streetViewLink")}</span>
           </a>
         </div>
       )}
