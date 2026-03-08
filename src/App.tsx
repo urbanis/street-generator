@@ -96,14 +96,12 @@ export default function App() {
           />
 
           <div className="flex flex-1 flex-col overflow-hidden">
-            <PanelGroup orientation="vertical">
-              <Panel defaultSize={40} minSize={20}>
-                <div className="h-full overflow-y-auto">
-                  <CrossSectionView street={street} highlightedIds={highlightedIds} />
-                </div>
+            <PanelGroup orientation="vertical" defaultLayout={{ "cross-section": 50, "map": 50 }}>
+              <Panel id="cross-section" defaultSize={50} minSize={20}>
+                <CrossSectionView street={street} highlightedIds={highlightedIds} />
               </Panel>
               <PanelResizeHandle className="h-1 bg-border hover:bg-primary/40 transition-colors cursor-row-resize" />
-              <Panel minSize={20}>
+              <Panel id="map" defaultSize={50} minSize={20}>
                 <MapPanel mapReference={mapReference} />
               </Panel>
             </PanelGroup>
