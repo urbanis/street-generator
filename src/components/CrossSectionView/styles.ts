@@ -1,5 +1,5 @@
 export const CROSS_SECTION_VIEW = "flex flex-col w-full h-full bg-background";
-export const CSV_HEADER = "flex flex-col gap-1.5 border-b border-border px-3 py-2 shrink-0";
+export const CSV_HEADER = "border-b border-border px-3 py-2 shrink-0";
 export const CSV_TITLE = "text-xs font-medium text-foreground";
 export const CSV_CONTROLS = "flex items-center gap-2 flex-wrap";
 export const CSV_SVG_WRAP = "flex-1 overflow-auto flex items-center justify-center p-4";

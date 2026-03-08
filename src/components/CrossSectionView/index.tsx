@@ -3,7 +3,7 @@ import { useLang } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import { getElementDef } from "../../elements/registry";
 import { computeLayout } from "./renderer";
-import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_TITLE, CSV_CONTROLS, CSV_SVG_WRAP, THEME_SELECT, EXPORT_BTN } from "./styles";
+import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP, THEME_SELECT, EXPORT_BTN } from "./styles";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 
@@ -39,7 +39,8 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
   const W = layout.totalWidthPx;
   const H = layout.heightPx;
   const LABEL_H = showLabels ? 20 : 0;
-  const SVG_H = H + LABEL_H + 24;
+  const NAME_H  = street.name ? 32 : 0;
+  const SVG_H = NAME_H + H + LABEL_H + 24;
 
   function exportSvg() {
     if (!svgRef.current) return;
@@ -81,8 +82,8 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
   return (
     <div className={CROSS_SECTION_VIEW}>
       <div className={CSV_HEADER}>
-        {street.name && <span className={CSV_TITLE}>{street.name}</span>}
         <div className={CSV_CONTROLS}>
+          <span className="text-xs text-muted-foreground">{lang === "de" ? "Stil" : "Style"}</span>
           <select
             className={THEME_SELECT}
             value={theme}
@@ -121,6 +122,17 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
             xmlns="http://www.w3.org/2000/svg"
             className="block"
           >
+            {/* Street name */}
+            {street.name && (
+              <text
+                x={W / 2} y={10}
+                textAnchor="middle" dominantBaseline="middle"
+                fontSize={11} fontWeight="600" fill="#111827"
+              >
+                {street.name}
+              </text>
+            )}
+
             {layout.elements.map((le) => {
               const el = street.elements.find((e) => e.id === le.id)!;
               const def = getElementDef(el.type);
@@ -129,7 +141,7 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
               const isHighlighted = highlightedIds.includes(el.id);
 
               return (
-                <g key={el.id}>
+                <g key={el.id} transform={`translate(0, ${NAME_H})`}>
                   {def.renderSVG({ x: le.x, widthPx: le.widthPx, heightPx: H, style, scale: layout.scale })}
                   {isHighlighted && (
                     <rect x={le.x} y={0} width={le.widthPx} height={H}
@@ -140,13 +152,13 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
             })}
 
             {/* Dimension line */}
-            <line x1={0} y1={H + 4} x2={W} y2={H + 4} stroke="#6b7280" strokeWidth={1} />
+            <line x1={0} y1={NAME_H + H + 4} x2={W} y2={NAME_H + H + 4} stroke="#6b7280" strokeWidth={1} />
             {layout.elements.map((le) => {
               const el = street.elements.find((e) => e.id === le.id)!;
               return (
                 <g key={`dim-${el.id}`}>
-                  <line x1={le.x} y1={H + 1} x2={le.x} y2={H + 8} stroke="#6b7280" strokeWidth={1} />
-                  <text x={le.x + le.widthPx / 2} y={H + 18}
+                  <line x1={le.x} y1={NAME_H + H + 1} x2={le.x} y2={NAME_H + H + 8} stroke="#6b7280" strokeWidth={1} />
+                  <text x={le.x + le.widthPx / 2} y={NAME_H + H + 18}
                     textAnchor="middle" fontSize={9} fill="#6b7280">
                     {el.width_m.toFixed(2)}m
                   </text>
@@ -159,16 +171,17 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
               const el = street.elements.find((e) => e.id === le.id)!;
               const def = getElementDef(el.type);
               if (le.widthPx < 24) return null;
+              const cy = NAME_H + H / 2;
               return (
                 <text
                   key={`lbl-${el.id}`}
                   x={le.x + le.widthPx / 2}
-                  y={H / 2}
+                  y={cy}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   fontSize={Math.min(10, le.widthPx / 5)}
                   fill="#374151"
-                  transform={le.widthPx < 60 ? `rotate(-90, ${le.x + le.widthPx / 2}, ${H / 2})` : undefined}
+                  transform={le.widthPx < 60 ? `rotate(-90, ${le.x + le.widthPx / 2}, ${cy})` : undefined}
                 >
                   {def.label[lang]}
                 </text>
