@@ -2,6 +2,7 @@ import { useT } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import type { ValidationResultItem } from "../../rules/types";
 import type { MapReference } from "../../models/map";
+import type { MapLayer, MapMode } from "../../models/explore";
 import { ExploreTab } from "../tabs/ExploreTab";
 import { DesignTab } from "../tabs/DesignTab";
 import { EvaluateTab } from "../tabs/EvaluateTab";
@@ -23,12 +24,21 @@ interface SidebarProps {
   onStreetGenerated: (street: StreetConfig) => void;
   osmDisclaimer: boolean;
   onClearOsmDisclaimer: () => void;
+  mapLayer:              MapLayer;
+  mapMode:               MapMode;
+  onMapLayerChange:      (layer: MapLayer) => void;
+  onMapModeChange:       (mode: MapMode) => void;
+  onSectionLineChange:   (line: [number, number][] | undefined) => void;
+  onMeasurePointsChange: (pts: [number, number][] | undefined) => void;
+  onRegisterMapClick:    (fn: ((lat: number, lng: number) => void) | null) => void;
 }
 
 export function Sidebar({
   activeTab, onTabChange, street, onStreetChange,
   highlightedIds, results, mapReference, onReferenceSet,
   onStreetGenerated, osmDisclaimer, onClearOsmDisclaimer,
+  mapLayer, mapMode, onMapLayerChange, onMapModeChange,
+  onSectionLineChange, onMeasurePointsChange, onRegisterMapClick,
 }: SidebarProps) {
   const t = useT();
 
@@ -53,6 +63,13 @@ export function Sidebar({
           onReferenceSet={onReferenceSet}
           onStreetGenerated={onStreetGenerated}
           onTabChange={onTabChange}
+          mapLayer={mapLayer}
+          mapMode={mapMode}
+          onMapLayerChange={onMapLayerChange}
+          onMapModeChange={onMapModeChange}
+          onSectionLineChange={onSectionLineChange}
+          onMeasurePointsChange={onMeasurePointsChange}
+          onRegisterMapClick={onRegisterMapClick}
         />
       </div>
       <div className={`${TAB_CONTENT} ${activeTab === "design" ? "" : "hidden"}`}>

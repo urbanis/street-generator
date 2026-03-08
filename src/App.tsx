@@ -13,6 +13,7 @@ import type { TemplateOption } from "./templates";
 import { initStreet, encodeStreetToUrl, saveToLocalStorage } from "./persistence";
 import { LangProvider } from "./i18n";
 import type { Lang } from "./i18n";
+import type { MapLayer, MapMode } from "./models/explore";
 
 const LANG_KEY = "berlin-street-designer-lang";
 
@@ -40,6 +41,11 @@ export default function App() {
   const [activeTab, setActiveTab]         = useState<Tab>("design");
   const [osmDisclaimer, setOsmDisclaimer] = useState(false);
   const [shareCopied, setShareCopied]     = useState(false);
+  const [mapLayer,      setMapLayer]      = useState<MapLayer>("osm");
+  const [mapMode,       setMapMode]       = useState<MapMode>("none");
+  const [sectionLine,   setSectionLine]   = useState<[number, number][] | undefined>();
+  const [measurePoints, setMeasurePoints] = useState<[number, number][] | undefined>();
+  const [onMapClick,    setOnMapClick]    = useState<((lat: number, lng: number) => void) | undefined>();
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
@@ -93,6 +99,13 @@ export default function App() {
             onStreetGenerated={handleStreetGenerated}
             osmDisclaimer={osmDisclaimer}
             onClearOsmDisclaimer={() => setOsmDisclaimer(false)}
+            mapLayer={mapLayer}
+            mapMode={mapMode}
+            onMapLayerChange={setMapLayer}
+            onMapModeChange={setMapMode}
+            onSectionLineChange={setSectionLine}
+            onMeasurePointsChange={setMeasurePoints}
+            onRegisterMapClick={(fn) => setOnMapClick(() => fn ?? undefined)}
           />
 
           <div className="flex flex-1 flex-col overflow-hidden">
@@ -102,7 +115,14 @@ export default function App() {
               </Panel>
               <PanelResizeHandle className="h-1 bg-border hover:bg-primary/40 transition-colors cursor-row-resize" />
               <Panel id="map" defaultSize={50} minSize={20}>
-                <MapPanel mapReference={mapReference} />
+                <MapPanel
+                  mapReference={mapReference}
+                  mapLayer={mapLayer}
+                  mapMode={mapMode}
+                  onMapClick={onMapClick}
+                  sectionLine={sectionLine}
+                  measurePoints={measurePoints}
+                />
               </Panel>
             </PanelGroup>
           </div>
