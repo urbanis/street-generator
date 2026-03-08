@@ -24,6 +24,15 @@ function MapClickHandler({ onMapClick, mapMode }: {
   onMapClick?: (lat: number, lng: number) => void;
   mapMode: MapMode;
 }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    container.style.cursor =
+      mapMode === "inspect"      ? "help"      :
+      mapMode !== "none"         ? "crosshair" : "";
+  }, [map, mapMode]);
+
   useMapEvents({
     click(e) {
       if (mapMode !== "none" && onMapClick) {
