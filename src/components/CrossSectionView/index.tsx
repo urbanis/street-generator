@@ -47,7 +47,7 @@ interface CrossSectionViewProps {
 
 export function CrossSectionView({ street, highlightedIds, templates, onTemplateApply }: CrossSectionViewProps) {
   const lang                                   = useLang();
-  const [theme, setTheme]                      = useState<SvgTheme>("full");
+  const [theme, setTheme]                      = useState<SvgTheme>("outline-label-measure");
   const [zoom, setZoom]                        = useState(1);
   const svgRef                                 = useRef<SVGSVGElement>(null);
   const wrapRef                                = useRef<HTMLDivElement>(null);
