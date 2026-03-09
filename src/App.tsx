@@ -14,6 +14,8 @@ import { initStreet, encodeStreetToUrl, saveToLocalStorage } from "./persistence
 import { LangProvider } from "./i18n";
 import type { Lang } from "./i18n";
 import type { MapLayer, MapMode } from "./models/explore";
+import type { WfsLayer } from "./models/wfs";
+import { DEFAULT_WFS_LAYERS } from "./models/wfs";
 
 const LANG_KEY = "berlin-street-designer-lang";
 
@@ -46,6 +48,7 @@ export default function App() {
   const [sectionLine,   setSectionLine]   = useState<[number, number][] | undefined>();
   const [measurePoints, setMeasurePoints] = useState<[number, number][] | undefined>();
   const [onMapClick,    setOnMapClick]    = useState<((lat: number, lng: number) => void) | undefined>();
+  const [wfsLayers,     setWfsLayers]     = useState<WfsLayer[]>(DEFAULT_WFS_LAYERS);
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
@@ -122,6 +125,8 @@ export default function App() {
                   onMapClick={onMapClick}
                   sectionLine={sectionLine}
                   measurePoints={measurePoints}
+                  wfsLayers={wfsLayers}
+                  onWfsLayersChange={setWfsLayers}
                 />
               </Panel>
             </PanelGroup>

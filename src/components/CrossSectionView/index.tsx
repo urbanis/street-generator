@@ -29,6 +29,13 @@ interface CrossSectionViewProps {
   highlightedIds: string[];
 }
 
+const FLOOR_COLORS: Record<string, string> = {
+  Wohnen:     "#bfdbfe",
+  Gewerbe:    "#fde68a",
+  Gemischt:   "#c4b5fd",
+  Öffentlich: "#bbf7d0",
+};
+
 export function CrossSectionView({ street, highlightedIds }: CrossSectionViewProps) {
   const lang = useLang();
   const [theme, setTheme] = useState<SvgTheme>("full");
@@ -134,17 +141,53 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
             )}
 
             {layout.elements.map((le) => {
-              const el = street.elements.find((e) => e.id === le.id)!;
-              const def = getElementDef(el.type);
-              const mergedStyle = { ...def.defaultStyle, ...el.style };
-              const style = showColor ? mergedStyle : { fill: "#ffffff", stroke: "#333333" };
+              const el          = street.elements.find((e) => e.id === le.id)!;
+              const def         = getElementDef(el.type);
+              const isBuilding  = el.type === "BUILDING_LEFT" || el.type === "BUILDING_RIGHT";
+              const elH         = le.heightPx;
+              const yBase       = NAME_H + H - elH; // bottom-align all elements
               const isHighlighted = highlightedIds.includes(el.id);
 
+              if (isBuilding && el.building && showColor) {
+                const bandH = elH / el.building.floors.length;
+                return (
+                  <g key={el.id} transform={`translate(0, ${yBase})`}>
+                    {[...el.building.floors].reverse().map((floor, i) => (
+                      <g key={i}>
+                        <rect
+                          x={le.x} y={i * bandH}
+                          width={le.widthPx} height={bandH}
+                          fill={FLOOR_COLORS[floor.use] ?? "#e5e7eb"}
+                          stroke="#6b7280" strokeWidth={0.5}
+                        />
+                        {showLabels && bandH > 14 && (
+                          <text
+                            x={le.x + le.widthPx / 2} y={i * bandH + bandH / 2}
+                            textAnchor="middle" dominantBaseline="middle"
+                            fontSize={Math.min(9, le.widthPx / 6)} fill="#374151"
+                            transform={le.widthPx < 50 ? `rotate(-90, ${le.x + le.widthPx / 2}, ${i * bandH + bandH / 2})` : undefined}
+                          >
+                            {floor.use}
+                          </text>
+                        )}
+                      </g>
+                    ))}
+                    {isHighlighted && (
+                      <rect x={le.x} y={0} width={le.widthPx} height={elH}
+                        fill="none" stroke="#ef4444" strokeWidth={2} />
+                    )}
+                  </g>
+                );
+              }
+
+              // Non-building (or B&W building fallback)
+              const mergedStyle = { ...def.defaultStyle, ...el.style };
+              const style = showColor ? mergedStyle : { fill: "#ffffff", stroke: "#333333" };
               return (
-                <g key={el.id} transform={`translate(0, ${NAME_H})`}>
-                  {def.renderSVG({ x: le.x, widthPx: le.widthPx, heightPx: H, style, scale: layout.scale })}
+                <g key={el.id} transform={`translate(0, ${yBase})`}>
+                  {def.renderSVG({ x: le.x, widthPx: le.widthPx, heightPx: elH, style, scale: layout.scale })}
                   {isHighlighted && (
-                    <rect x={le.x} y={0} width={le.widthPx} height={H}
+                    <rect x={le.x} y={0} width={le.widthPx} height={elH}
                       fill="none" stroke="#ef4444" strokeWidth={2} />
                   )}
                 </g>
@@ -168,10 +211,11 @@ export function CrossSectionView({ street, highlightedIds }: CrossSectionViewPro
 
             {/* Labels */}
             {showLabels && layout.elements.map((le) => {
-              const el = street.elements.find((e) => e.id === le.id)!;
+              const el  = street.elements.find((e) => e.id === le.id)!;
               const def = getElementDef(el.type);
+              if (el.type === "BUILDING_LEFT" || el.type === "BUILDING_RIGHT") return null;
               if (le.widthPx < 24) return null;
-              const cy = NAME_H + H / 2;
+              const cy = NAME_H + H - le.heightPx / 2;
               return (
                 <text
                   key={`lbl-${el.id}`}

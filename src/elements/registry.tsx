@@ -7,6 +7,7 @@ import {
   Bus,
   AlignCenter,
   Flower2,
+  Building2,
 } from "lucide-react";
 import type { ElementDef } from "./types";
 import type { ElementType } from "../models/street";
@@ -110,6 +111,28 @@ const REGISTRY: ElementDef[] = [
     defaultWidth_m: 1.5,
     defaultStyle: { fill: "#86efac", stroke: "#15803d" },
     icon: Flower2,
+    renderSVG: ({ x, widthPx, heightPx, style }) => (
+      <rect x={x} y={0} width={widthPx} height={heightPx}
+        fill={style.fill} stroke={style.stroke} strokeWidth={1} />
+    ),
+  },
+  {
+    type: "BUILDING_LEFT",
+    label: { de: "Gebäude links", en: "Building left" },
+    defaultWidth_m: 15,
+    defaultStyle: { fill: "#e5e7eb", stroke: "#6b7280" },
+    icon: Building2,
+    renderSVG: ({ x, widthPx, heightPx, style }) => (
+      <rect x={x} y={0} width={widthPx} height={heightPx}
+        fill={style.fill} stroke={style.stroke} strokeWidth={1} />
+    ),
+  },
+  {
+    type: "BUILDING_RIGHT",
+    label: { de: "Gebäude rechts", en: "Building right" },
+    defaultWidth_m: 15,
+    defaultStyle: { fill: "#e5e7eb", stroke: "#6b7280" },
+    icon: Building2,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
       <rect x={x} y={0} width={widthPx} height={heightPx}
         fill={style.fill} stroke={style.stroke} strokeWidth={1} />

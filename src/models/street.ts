@@ -6,7 +6,9 @@ export type ElementType =
   | "TRAFFIC_LANE"
   | "BUS_LANE"
   | "MEDIAN"
-  | "PLANTING_STRIP";
+  | "PLANTING_STRIP"
+  | "BUILDING_LEFT"
+  | "BUILDING_RIGHT";
 
 export type Side = "LEFT" | "CENTER" | "RIGHT";
 
@@ -15,17 +17,29 @@ export interface ElementStyle {
   stroke: string;
 }
 
+export type FloorUse = "Wohnen" | "Gewerbe" | "Gemischt" | "Öffentlich";
+
+export interface BuildingFloor {
+  use:      FloorUse;
+  height_m: number; // always 3 for now
+}
+
+export interface BuildingData {
+  floors: BuildingFloor[];
+}
+
 export interface StreetElement {
-  id: string;
-  type: ElementType;
-  side: Side;
-  width_m: number;
-  style?: ElementStyle;
+  id:       string;
+  type:     ElementType;
+  side:     Side;
+  width_m:  number;
+  style?:   ElementStyle;
+  building?: BuildingData; // only present when type === "BUILDING_LEFT" | "BUILDING_RIGHT"
 }
 
 export interface StreetConfig {
-  id: string;
-  name: string;
+  id:           string;
+  name:         string;
   totalWidth_m?: number;
-  elements: StreetElement[];
+  elements:     StreetElement[];
 }

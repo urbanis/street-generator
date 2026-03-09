@@ -17,6 +17,13 @@ interface DesignTabProps {
   onClearOsmDisclaimer: () => void;
 }
 
+function sortBuildingsToEdges(elements: StreetElement[]): StreetElement[] {
+  const left   = elements.filter((e) => e.type === "BUILDING_LEFT");
+  const middle = elements.filter((e) => e.type !== "BUILDING_LEFT" && e.type !== "BUILDING_RIGHT");
+  const right  = elements.filter((e) => e.type === "BUILDING_RIGHT");
+  return [...left, ...middle, ...right];
+}
+
 export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer }: DesignTabProps) {
   const t = useT();
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -49,13 +56,23 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
 
   function addElement(type: ElementType) {
     const def = getElementDef(type);
+    const isBuilding = type === "BUILDING_LEFT" || type === "BUILDING_RIGHT";
+    if (isBuilding && street.elements.some((e) => e.type === type)) return;
     const newEl: StreetElement = {
-      id: crypto.randomUUID(),
+      id:       crypto.randomUUID(),
       type,
-      side: "LEFT",
-      width_m: def.defaultWidth_m,
+      side:     "LEFT",
+      width_m:  def.defaultWidth_m,
+      building: isBuilding
+        ? { floors: [
+            { use: "Wohnen", height_m: 3 },
+            { use: "Wohnen", height_m: 3 },
+            { use: "Wohnen", height_m: 3 },
+          ]}
+        : undefined,
     };
-    onStreetChange({ ...street, elements: [...street.elements, newEl] });
+    const elements = sortBuildingsToEdges([...street.elements, newEl]);
+    onStreetChange({ ...street, elements });
   }
 
   function handleDrop(targetIndex: number) {
@@ -92,7 +109,10 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
 
       <div className="border-b border-border pb-2">
         <p className="text-xs text-muted-foreground mb-1.5">{t("addElement")}</p>
-        <ElementPalette onAdd={addElement} />
+        <ElementPalette
+          onAdd={addElement}
+          existingTypes={street.elements.map((e) => e.type)}
+        />
       </div>
 
       <div className={ELEMENT_LIST}>
