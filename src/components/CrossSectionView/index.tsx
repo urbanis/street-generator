@@ -273,7 +273,7 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
                       x={cx} y={nameY}
                       textAnchor="middle" fontSize={9} fill="#374151"
                     >
-                      {def.label[lang]}
+                      {el.label || def.label[lang]}
                     </text>
                   )}
                   {!tooNarrow && showMeasure && (

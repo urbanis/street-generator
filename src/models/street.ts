@@ -33,6 +33,7 @@ export interface StreetElement {
   type:     ElementType;
   side:     Side;
   width_m:  number;
+  label?:   string;          // custom display label; falls back to element type label if absent
   style?:   ElementStyle;
   building?: BuildingData; // only present when type === "BUILDING_LEFT" | "BUILDING_RIGHT"
 }
