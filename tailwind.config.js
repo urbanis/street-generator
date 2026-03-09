@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["panel-sans", "sans-serif"],
+        sans: ["itc-avant-garde-gothic-pro", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, X, ChevronsUpDown } from "lucide-react";
 import type { StreetConfig, StreetElement, ElementType } from "../../../models/street";
-import { useT } from "../../../i18n";
+import { useT, useLang } from "../../../i18n";
 import { getElementDef } from "../../../elements/registry";
 import { ElementCard } from "./ElementCard";
 import { ElementPalette } from "./ElementPalette";
 import { DESIGN_TAB, DISCLAIMER, ELEMENT_LIST, EMPTY_STATE } from "./styles";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -25,9 +26,11 @@ function sortBuildingsToEdges(elements: StreetElement[]): StreetElement[] {
 }
 
 export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer }: DesignTabProps) {
-  const t = useT();
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const t    = useT();
+  const lang = useLang();
+  const [dragIndex, setDragIndex]       = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [allOpen, setAllOpen]           = useState<boolean | null>(null);
 
   function updateElement(index: number, updated: StreetElement) {
     const elements = [...street.elements];
@@ -115,6 +118,23 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
         />
       </div>
 
+      {street.elements.length > 0 && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">{street.elements.length} {lang === "de" ? "Elemente" : "elements"}</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-1.5 text-xs text-muted-foreground gap-1"
+            onClick={() => setAllOpen((v) => v !== true)}
+          >
+            <ChevronsUpDown size={11} />
+            {allOpen === true
+              ? (lang === "de" ? "Alle schließen" : "Collapse all")
+              : (lang === "de" ? "Alle öffnen"    : "Expand all")}
+          </Button>
+        </div>
+      )}
+
       <div className={ELEMENT_LIST}>
         {street.elements.length === 0 ? (
           <div className={EMPTY_STATE}>{t("noElements")}</div>
@@ -127,6 +147,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
               total={street.elements.length}
               isHighlighted={highlightedIds.includes(el.id)}
               isDragOver={dragOverIndex === i}
+              forceOpen={allOpen}
               onChange={(updated) => updateElement(i, updated)}
               onMoveUp={() => moveUp(i)}
               onMoveDown={() => moveDown(i)}

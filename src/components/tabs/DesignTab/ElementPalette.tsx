@@ -25,7 +25,7 @@ export function ElementPalette({ onAdd, existingTypes = [] }: ElementPaletteProp
             disabled={disabled}
             title={disabled ? (lang === "de" ? "Bereits vorhanden" : "Already added") : undefined}
           >
-            <Icon size={16} color={def.defaultStyle.fill === "#d1d5db" ? "#6b7280" : def.defaultStyle.stroke} />
+            <Icon size={16} />
             <span>{def.label[lang]}</span>
           </button>
         );
