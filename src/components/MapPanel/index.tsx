@@ -12,6 +12,15 @@ const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenS
 const SAT_URL  = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const SAT_ATTR = "Tiles &copy; Esri &mdash; Esri, Maxar, Earthstar Geographics";
 
+function MapInvalidator() {
+  const map = useMap();
+  useEffect(() => {
+    const id = setTimeout(() => map.invalidateSize(), 50);
+    return () => clearTimeout(id);
+  }, [map]);
+  return null;
+}
+
 function MapFlyTo({ mapReference }: { mapReference: MapReference | null }) {
   const map = useMap();
   useEffect(() => {
@@ -228,6 +237,7 @@ export function MapPanel({
           <TileLayer attribution={OSM_ATTR} url={OSM_URL} />
         )}
 
+        <MapInvalidator />
         <MapFlyTo mapReference={mapReference} />
         <MapClickHandler onMapClick={onMapClick} mapMode={mapMode} />
 

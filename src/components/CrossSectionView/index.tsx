@@ -138,16 +138,12 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title="Zoom out"><ZoomOut size={12} /></Button>
           </div>
           <div className="flex items-center gap-1 ml-auto">
-            <span className="text-xs text-muted-foreground mr-1">{lang === "de" ? "Exportieren" : "Export"}</span>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng}>
-              <Download size={11} />PNG
-            </Button>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg}>
-              <Download size={11} />SVG
-            </Button>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportJson}>
-              <Download size={11} />JSON
-            </Button>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground mr-1">
+              <Download size={11} />{lang === "de" ? "Exportieren" : "Export"}
+            </span>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng}>PNG</Button>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg}>SVG</Button>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportJson}>JSON</Button>
           </div>
         </div>
       </div>
