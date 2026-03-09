@@ -49,6 +49,7 @@ export default function App() {
   const [measurePoints, setMeasurePoints] = useState<[number, number][] | undefined>();
   const [onMapClick,    setOnMapClick]    = useState<((lat: number, lng: number) => void) | undefined>();
   const [wfsLayers,     setWfsLayers]     = useState<WfsLayer[]>(DEFAULT_WFS_LAYERS);
+  const [docsOpen,      setDocsOpen]      = useState(false);
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
@@ -86,8 +87,8 @@ export default function App() {
           onStreetImport={setStreet}
           onShare={handleShare}
           shareCopied={shareCopied}
-          templates={TEMPLATES}
-          onTemplateApply={handleTemplateApply}
+          docsOpen={docsOpen}
+          onDocsClose={() => setDocsOpen(false)}
         />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar
@@ -109,12 +110,18 @@ export default function App() {
             onSectionLineChange={setSectionLine}
             onMeasurePointsChange={setMeasurePoints}
             onRegisterMapClick={(fn) => setOnMapClick(() => fn ?? undefined)}
+            onOpenDocs={() => setDocsOpen(true)}
           />
 
           <div className="flex flex-1 flex-col overflow-hidden">
             <PanelGroup orientation="vertical" defaultLayout={{ "cross-section": 50, "map": 50 }}>
               <Panel id="cross-section" defaultSize={50} minSize={20}>
-                <CrossSectionView street={street} highlightedIds={highlightedIds} />
+                <CrossSectionView
+                  street={street}
+                  highlightedIds={highlightedIds}
+                  templates={TEMPLATES}
+                  onTemplateApply={handleTemplateApply}
+                />
               </Panel>
               <PanelResizeHandle className="h-1 bg-border hover:bg-primary/40 transition-colors cursor-row-resize" />
               <Panel id="map" defaultSize={50} minSize={20}>

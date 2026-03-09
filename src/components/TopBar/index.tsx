@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { useT } from "../../i18n";
 import type { Lang } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
-import type { TemplateOption } from "../../templates";
 import { Button } from "@/components/ui/button";
-import { Share2, BookOpen, FileUp, Check, X } from "lucide-react";
+import { Share2, FileUp, Check, X } from "lucide-react";
 import {
   TOP_BAR, BRAND_SECTION, BRAND_ICON, BRAND_TITLE, BRAND_VERSION,
   TOOLBAR_SECTION, LANG_ACTIVE, LANG_INACTIVE,
@@ -17,13 +15,12 @@ interface TopBarProps {
   onStreetImport: (street: StreetConfig) => void;
   onShare: () => void;
   shareCopied: boolean;
-  templates: TemplateOption[];
-  onTemplateApply: (tpl: TemplateOption) => void;
+  docsOpen: boolean;
+  onDocsClose: () => void;
 }
 
-export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopied, templates, onTemplateApply }: TopBarProps) {
+export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopied, docsOpen, onDocsClose }: TopBarProps) {
   const t = useT();
-  const [docsOpen, setDocsOpen] = useState(false);
 
   function handleImport() {
     const input = document.createElement("input");
@@ -56,31 +53,9 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
         </div>
 
         <div className={TOOLBAR_SECTION}>
-          <select
-            className="h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground"
-            defaultValue=""
-            onChange={(e) => {
-              const tpl = templates.find((t) => t.id === e.target.value);
-              if (tpl) onTemplateApply(tpl);
-              e.target.value = "";
-            }}
-          >
-            <option value="" disabled>{t("newStreet")}</option>
-            {templates.map((tpl) => (
-              <option key={tpl.id} value={tpl.id}>
-                {tpl.label[lang]}
-              </option>
-            ))}
-          </select>
-
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={handleImport}>
             <FileUp size={12} />
             {t("importJson")}
-          </Button>
-
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={() => setDocsOpen(true)}>
-            <BookOpen size={12} />
-            {t("documentation")}
           </Button>
 
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={onShare}>
@@ -97,9 +72,9 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
 
       {/* Documentation modal */}
       {docsOpen && (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/40" onClick={() => setDocsOpen(false)}>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/40" onClick={() => onDocsClose()}>
           <div className="relative bg-background rounded-lg border border-border shadow-lg p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
-            <button className="absolute top-3 right-3 text-muted-foreground hover:text-foreground" onClick={() => setDocsOpen(false)}>
+            <button className="absolute top-3 right-3 text-muted-foreground hover:text-foreground" onClick={() => onDocsClose()}>
               <X size={16} />
             </button>
             <h2 className="text-sm font-semibold mb-3">{t("documentation")}</h2>
