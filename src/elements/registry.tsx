@@ -119,7 +119,7 @@ const REGISTRY: ElementDef[] = [
   {
     type: "BUILDING_LEFT",
     label: { de: "Gebäude links", en: "Building left" },
-    defaultWidth_m: 15,
+    defaultWidth_m: 6,
     defaultStyle: { fill: "#e5e7eb", stroke: "#6b7280" },
     icon: Building2,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
@@ -130,7 +130,7 @@ const REGISTRY: ElementDef[] = [
   {
     type: "BUILDING_RIGHT",
     label: { de: "Gebäude rechts", en: "Building right" },
-    defaultWidth_m: 15,
+    defaultWidth_m: 6,
     defaultStyle: { fill: "#e5e7eb", stroke: "#6b7280" },
     icon: Building2,
     renderSVG: ({ x, widthPx, heightPx, style }) => (

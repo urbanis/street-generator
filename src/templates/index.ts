@@ -29,21 +29,21 @@ export const TEMPLATES: TemplateOption[] = [
     id: "residential",
     label: { de: "Wohnstraße", en: "Residential street" },
     config: makeStreet("Wohnstraße", [
-      { id: crypto.randomUUID(), type: "BUILDING_LEFT",  side: "LEFT",   width_m: 12, building: THREE_FLOORS },
+      { id: crypto.randomUUID(), type: "BUILDING_LEFT",  side: "LEFT",   width_m: 6, building: THREE_FLOORS },
       { id: crypto.randomUUID(), type: "SIDEWALK",       side: "LEFT",   width_m: 3.0 },
       { id: crypto.randomUUID(), type: "PLANTING_STRIP", side: "LEFT",   width_m: 1.5 },
       { id: crypto.randomUUID(), type: "TRAFFIC_LANE",   side: "LEFT",   width_m: 3.25 },
       { id: crypto.randomUUID(), type: "TRAFFIC_LANE",   side: "RIGHT",  width_m: 3.25 },
       { id: crypto.randomUUID(), type: "PLANTING_STRIP", side: "RIGHT",  width_m: 1.5 },
       { id: crypto.randomUUID(), type: "SIDEWALK",       side: "RIGHT",  width_m: 3.0 },
-      { id: crypto.randomUUID(), type: "BUILDING_RIGHT", side: "RIGHT",  width_m: 12, building: THREE_FLOORS },
+      { id: crypto.randomUUID(), type: "BUILDING_RIGHT", side: "RIGHT",  width_m: 6, building: THREE_FLOORS },
     ]),
   },
   {
     id: "mainroad",
     label: { de: "Hauptstraße", en: "Main road" },
     config: makeStreet("Hauptstraße", [
-      { id: crypto.randomUUID(), type: "BUILDING_LEFT",  side: "LEFT",   width_m: 12, building: THREE_FLOORS },
+      { id: crypto.randomUUID(), type: "BUILDING_LEFT",  side: "LEFT",   width_m: 6, building: THREE_FLOORS },
       { id: crypto.randomUUID(), type: "SIDEWALK",       side: "LEFT",   width_m: 4.0 },
       { id: crypto.randomUUID(), type: "CYCLE_LANE",     side: "LEFT",   width_m: 2.0 },
       { id: crypto.randomUUID(), type: "BUFFER",         side: "LEFT",   width_m: 0.75 },
@@ -57,7 +57,7 @@ export const TEMPLATES: TemplateOption[] = [
       { id: crypto.randomUUID(), type: "BUFFER",         side: "RIGHT",  width_m: 0.75 },
       { id: crypto.randomUUID(), type: "CYCLE_LANE",     side: "RIGHT",  width_m: 2.0 },
       { id: crypto.randomUUID(), type: "SIDEWALK",       side: "RIGHT",  width_m: 4.0 },
-      { id: crypto.randomUUID(), type: "BUILDING_RIGHT", side: "RIGHT",  width_m: 12, building: THREE_FLOORS },
+      { id: crypto.randomUUID(), type: "BUILDING_RIGHT", side: "RIGHT",  width_m: 6, building: THREE_FLOORS },
     ]),
   },
 ];
