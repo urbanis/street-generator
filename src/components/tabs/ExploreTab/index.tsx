@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Search, Maximize2, Trash2, MapPin, ExternalLink } from "lucide-react";
+import { Search, Maximize2, Trash2, MapPin, ExternalLink, Eye, EyeOff } from "lucide-react";
 import L from "leaflet";
 import { useT, useLang } from "../../../i18n";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,9 @@ interface ExploreTabProps {
   onSectionLineChange:   (line: [number, number][] | undefined) => void;
   onMeasurePointsChange: (pts: [number, number][] | undefined) => void;
   onRegisterMapClick:    (fn: ((lat: number, lng: number) => void) | null) => void;
+  mapVisible:            boolean;
+  onToggleMap:           () => void;
+  onShowMap:             () => void;
 }
 
 interface NominatimResult {
@@ -38,6 +41,7 @@ export function ExploreTab({
   mapReference, onReferenceSet, onStreetGenerated, onTabChange,
   mapLayer, mapMode, onMapLayerChange, onMapModeChange,
   onSectionLineChange, onMeasurePointsChange, onRegisterMapClick,
+  mapVisible, onToggleMap, onShowMap,
 }: ExploreTabProps) {
   const t    = useT();
   const lang = useLang();
@@ -85,6 +89,7 @@ export function ExploreTab({
   }, [query]);
 
   function selectResult(r: NominatimResult) {
+    onShowMap();
     const ref: MapReference = { lat: parseFloat(r.lat), lng: parseFloat(r.lon), zoom: 17, label: r.display_name };
     onReferenceSet(ref);
     setShowResults(false);
@@ -195,6 +200,7 @@ export function ExploreTab({
   // ── Mode toggle ───────────────────────────────────────────────────────────
 
   function toggleMode(mode: MapMode) {
+    onShowMap();
     const next = mapMode === mode ? "none" : mode;
     onMapModeChange(next);
     if (next !== "mark-section") { setSectionPoints([]); onSectionLineChange(undefined); }
@@ -227,7 +233,7 @@ export function ExploreTab({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") fetchSuggestions(query);
+              if (e.key === "Enter") { onShowMap(); fetchSuggestions(query); }
               if (e.key === "Escape") setShowResults(false);
             }}
             onFocus={() => results.length > 0 && setShowResults(true)}
@@ -247,25 +253,32 @@ export function ExploreTab({
             </div>
           )}
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => fetchSuggestions(query)}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => { onShowMap(); fetchSuggestions(query); }}>
           <Search size={14} />
         </Button>
       </div>
 
-      {/* Layer toggle */}
-      <div className="flex gap-1">
+      {/* Layer toggle + map visibility */}
+      <div className="flex gap-1 items-center">
         <button
           className={mapLayer === "osm" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
-          onClick={() => onMapLayerChange("osm")}
+          onClick={() => { onShowMap(); onMapLayerChange("osm"); }}
         >
           {t("mapStreet")}
         </button>
         <button
           className={mapLayer === "satellite" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
-          onClick={() => onMapLayerChange("satellite")}
+          onClick={() => { onShowMap(); onMapLayerChange("satellite"); }}
         >
           {t("mapSatellite")}
         </button>
+        <Button
+          variant="ghost" size="icon" className="h-7 w-7 ml-auto shrink-0"
+          title={mapVisible ? (lang === "de" ? "Karte ausblenden" : "Hide map") : (lang === "de" ? "Karte einblenden" : "Show map")}
+          onClick={onToggleMap}
+        >
+          {mapVisible ? <EyeOff size={13} /> : <Eye size={13} />}
+        </Button>
       </div>
 
       {/* Mode + utility toolbar */}

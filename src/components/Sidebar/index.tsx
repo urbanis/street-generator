@@ -32,6 +32,9 @@ interface SidebarProps {
   onMeasurePointsChange: (pts: [number, number][] | undefined) => void;
   onRegisterMapClick:    (fn: ((lat: number, lng: number) => void) | null) => void;
   onOpenDocs:            () => void;
+  mapVisible:            boolean;
+  onToggleMap:           () => void;
+  onShowMap:             () => void;
 }
 
 export function Sidebar({
@@ -40,6 +43,7 @@ export function Sidebar({
   onStreetGenerated, osmDisclaimer, onClearOsmDisclaimer,
   mapLayer, mapMode, onMapLayerChange, onMapModeChange,
   onSectionLineChange, onMeasurePointsChange, onRegisterMapClick, onOpenDocs,
+  mapVisible, onToggleMap, onShowMap,
 }: SidebarProps) {
   const t = useT();
 
@@ -71,6 +75,9 @@ export function Sidebar({
           onSectionLineChange={onSectionLineChange}
           onMeasurePointsChange={onMeasurePointsChange}
           onRegisterMapClick={onRegisterMapClick}
+          mapVisible={mapVisible}
+          onToggleMap={onToggleMap}
+          onShowMap={onShowMap}
         />
       </div>
       <div className={`${TAB_CONTENT} ${activeTab === "design" ? "" : "hidden"}`}>

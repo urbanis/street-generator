@@ -50,6 +50,7 @@ export default function App() {
   const [onMapClick,    setOnMapClick]    = useState<((lat: number, lng: number) => void) | undefined>();
   const [wfsLayers,     setWfsLayers]     = useState<WfsLayer[]>(DEFAULT_WFS_LAYERS);
   const [docsOpen,      setDocsOpen]      = useState(false);
+  const [mapVisible,    setMapVisible]    = useState(true);
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
@@ -111,6 +112,9 @@ export default function App() {
             onMeasurePointsChange={setMeasurePoints}
             onRegisterMapClick={(fn) => setOnMapClick(() => fn ?? undefined)}
             onOpenDocs={() => setDocsOpen(true)}
+            mapVisible={mapVisible}
+            onToggleMap={() => setMapVisible((v) => !v)}
+            onShowMap={() => setMapVisible(true)}
           />
 
           <div className="flex flex-1 flex-col overflow-hidden">
@@ -123,19 +127,23 @@ export default function App() {
                   onTemplateApply={handleTemplateApply}
                 />
               </Panel>
-              <PanelResizeHandle className="h-1 bg-border hover:bg-primary/40 transition-colors cursor-row-resize" />
-              <Panel id="map" defaultSize={50} minSize={20}>
-                <MapPanel
-                  mapReference={mapReference}
-                  mapLayer={mapLayer}
-                  mapMode={mapMode}
-                  onMapClick={onMapClick}
-                  sectionLine={sectionLine}
-                  measurePoints={measurePoints}
-                  wfsLayers={wfsLayers}
-                  onWfsLayersChange={setWfsLayers}
-                />
-              </Panel>
+              {mapVisible && (
+                <>
+                  <PanelResizeHandle className="h-1 bg-border hover:bg-primary/40 transition-colors cursor-row-resize" />
+                  <Panel id="map" defaultSize={50} minSize={20}>
+                    <MapPanel
+                      mapReference={mapReference}
+                      mapLayer={mapLayer}
+                      mapMode={mapMode}
+                      onMapClick={onMapClick}
+                      sectionLine={sectionLine}
+                      measurePoints={measurePoints}
+                      wfsLayers={wfsLayers}
+                      onWfsLayersChange={setWfsLayers}
+                    />
+                  </Panel>
+                </>
+              )}
             </PanelGroup>
           </div>
         </div>
