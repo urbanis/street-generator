@@ -28,6 +28,12 @@ export interface BuildingData {
   floors: BuildingFloor[];
 }
 
+export interface FigureConfig {
+  show:      boolean;  // default off
+  variant:   string;   // key into figure registry for this element type
+  height_m?: number;   // only for tree variants
+}
+
 export interface StreetElement {
   id:       string;
   type:     ElementType;
@@ -36,6 +42,7 @@ export interface StreetElement {
   label?:   string;          // custom display label; falls back to element type label if absent
   style?:   ElementStyle;
   building?: BuildingData; // only present when type === "BUILDING_LEFT" | "BUILDING_RIGHT"
+  figure?:  FigureConfig;   // ← add this
 }
 
 export interface StreetConfig {
