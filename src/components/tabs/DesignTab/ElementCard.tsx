@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getElementDef, REGISTRY } from "../../../elements/registry";
+import { getFigureVariants, getDefaultFigureVariant, isTreeVariant } from "../../../figures/registry";
+import type { FigureConfig } from "../../../models/street";
 import { CARD_BASE, CARD_DRAG_OVER, CARD_HIGHLIGHTED, CARD_DEFAULT, CARD_HEADER, CARD_BODY, GRIP } from "./styles";
 
 const SIDES: Side[] = ["LEFT", "CENTER", "RIGHT"];
@@ -252,6 +254,86 @@ export function ElementCard({
               </button>
             </div>
           )}
+
+          {/* Figure section — only for element types with figure variants */}
+          {(() => {
+            const variants = getFigureVariants(element.type);
+            if (!variants || variants.length === 0) return null;
+            const fig = element.figure;
+            const isTree = isTreeVariant(fig?.variant);
+            return (
+              <div className="flex flex-col gap-1.5 pt-1 border-t border-border">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-3.5 w-3.5 rounded border-border"
+                    checked={fig?.show ?? false}
+                    onChange={(e) => {
+                      const defaultVariant = getDefaultFigureVariant(element.type) ?? variants[0].id;
+                      const newFig: FigureConfig = {
+                        show:     e.target.checked,
+                        variant:  fig?.variant ?? defaultVariant,
+                        height_m: fig?.height_m,
+                      };
+                      onChange({ ...element, figure: newFig });
+                    }}
+                  />
+                  {t("showFigure")}
+                </label>
+
+                {fig?.show && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground shrink-0">{t("figureVariant")}</span>
+                    <Select
+                      value={fig.variant || variants[0].id}
+                      onValueChange={(v) => {
+                        const isNewTree = isTreeVariant(v);
+                        onChange({
+                          ...element,
+                          figure: {
+                            ...fig,
+                            variant:  v,
+                            height_m: isNewTree ? (fig.height_m ?? 8) : undefined,
+                          },
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="flex-1 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {variants.map((variant) => (
+                          <SelectItem key={variant.id} value={variant.id} className="text-xs">
+                            {variant.label[lang]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {fig?.show && isTree && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground shrink-0">{t("figureHeight")}</span>
+                    <Input
+                      type="number"
+                      className="w-16 h-7 text-xs"
+                      value={fig.height_m ?? 8}
+                      min={2} max={30} step={1}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        onChange({
+                          ...element,
+                          figure: { ...fig, height_m: isNaN(val) ? 8 : val },
+                        });
+                      }}
+                    />
+                    <span className="text-xs text-muted-foreground shrink-0">m</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

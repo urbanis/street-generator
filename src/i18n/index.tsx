@@ -89,6 +89,9 @@ const TRANSLATIONS = {
     addElement: "Element hinzufügen",
     streetName: "Straßenname",
     streetNamePlaceholder: "z. B. Unter den Linden",
+    showFigure:          "Figur anzeigen",
+    figureVariant:       "Variante",
+    figureHeight:        "Baumhöhe",
   },
   en: {
     appTitle: "Berlin Cross-Section Validator",
@@ -165,6 +168,9 @@ const TRANSLATIONS = {
     addElement: "Add element",
     streetName: "Street name",
     streetNamePlaceholder: "e.g. Unter den Linden",
+    showFigure:          "Show figure",
+    figureVariant:       "Variant",
+    figureHeight:        "Tree height",
   },
 } as const;
 

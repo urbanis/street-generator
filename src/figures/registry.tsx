@@ -395,3 +395,7 @@ export function getFigureVariants(type: ElementType): FigureVariant[] | undefine
 export function getDefaultFigureVariant(type: ElementType): string | undefined {
   return FIGURE_REGISTRY[type]?.[0]?.id;
 }
+
+export function isTreeVariant(variantId: string | undefined): boolean {
+  return variantId === "tree-deciduous" || variantId === "tree-conifer";
+}
