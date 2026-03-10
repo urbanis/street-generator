@@ -3,6 +3,7 @@ import { useLang } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import { getElementDef } from "../../elements/registry";
 import { computeLayout, BAND_H, ANN_H } from "./renderer";
+import { getFigureVariants } from "../../figures/registry";
 import type { TemplateOption } from "../../templates";
 import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP, THEME_SELECT, EXPORT_BTN } from "./styles";
 import { Button } from "@/components/ui/button";
@@ -291,6 +292,28 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
                       fill="none" stroke="#ef4444" strokeWidth={2}
                     />
                   )}
+                </g>
+              );
+            })}
+
+            {/* Figure rendering pass — line-art figures above ground band */}
+            {layout.elements.map((le) => {
+              const el = street.elements.find((e) => e.id === le.id)!;
+              if (!el.figure?.show) return null;
+              if (le.widthPx < 1.5 * layout.scale) return null; // too narrow
+              const variants = getFigureVariants(el.type);
+              if (!variants) return null;
+              const variant = variants.find((v) => v.id === el.figure!.variant) ?? variants[0];
+              if (!variant) return null;
+              return (
+                <g key={`fig-${le.id}`}>
+                  {variant.renderSVG({
+                    cx:       le.x + le.widthPx / 2,
+                    groundY:  GROUND_Y,
+                    widthPx:  le.widthPx,
+                    scale:    layout.scale,
+                    height_m: el.figure.height_m,
+                  })}
                 </g>
               );
             })}

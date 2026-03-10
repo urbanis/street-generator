@@ -1,4 +1,5 @@
 import type { StreetConfig } from "../../models/street";
+import { isTreeVariant } from "../../figures/registry";
 
 export interface RenderedElement {
   id:      string;
@@ -63,7 +64,7 @@ export function computeLayout(street: StreetConfig): RenderLayout {
     if (el.figure?.show) {
       const variantId = el.figure.variant;
       // Trees: use height_m directly
-      if (variantId === "tree-deciduous" || variantId === "tree-conifer") {
+      if (isTreeVariant(variantId)) {
         const h = (el.figure.height_m ?? 8) * scale;
         return Math.max(max, h + 8); // +8px breathing room
       }
