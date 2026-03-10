@@ -84,15 +84,61 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
     a.click();
   }
 
-  function exportPng() {
+  async function exportPng() {
     if (!svgRef.current) return;
-    const svg    = svgRef.current;
+    const SCALE = 3;
+    const svgEl = svgRef.current.cloneNode(true) as SVGSVGElement;
+    svgEl.setAttribute("width",  String(W || 400));
+    svgEl.setAttribute("height", String(SVG_H));
+
+    // White background rect
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    bg.setAttribute("x", "0"); bg.setAttribute("y", "0");
+    bg.setAttribute("width", String(W || 400)); bg.setAttribute("height", String(SVG_H));
+    bg.setAttribute("fill", "white");
+    svgEl.insertBefore(bg, svgEl.firstChild);
+
+    // Embed font so it renders correctly when SVG is drawn to canvas
+    let fontCss = `text { font-family: "itc-avant-garde-gothic-pro", Arial, sans-serif; font-weight: 300; }`;
+    try {
+      const cssText = await fetch("https://use.typekit.net/wld0zjn.css").then((r) => r.text());
+      const blockRx = /@font-face\s*\{([^}]+)\}/g;
+      let m: RegExpExecArray | null;
+      while ((m = blockRx.exec(cssText)) !== null) {
+        const block = m[1];
+        if (!block.includes("itc-avant-garde-gothic-pro")) continue;
+        if (!block.match(/font-weight\s*:\s*300/)) continue;
+        const urlMatch = block.match(/url\("([^"]+)"\)\s*format\("woff2"\)/);
+        if (!urlMatch) continue;
+        const fontBuf = await fetch(urlMatch[1]).then((r) => r.arrayBuffer());
+        const bytes = new Uint8Array(fontBuf);
+        let binary = "";
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        const b64 = btoa(binary);
+        fontCss = `@font-face { font-family: "itc-avant-garde-gothic-pro"; font-weight: 300; src: url("data:font/woff2;base64,${b64}") format("woff2"); } text { font-family: "itc-avant-garde-gothic-pro", Arial, sans-serif; font-weight: 300; }`;
+        break;
+      }
+    } catch { /* fall back to system font */ }
+
+    let defs = svgEl.querySelector("defs");
+    if (!defs) {
+      defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+      svgEl.insertBefore(defs, svgEl.firstChild);
+    }
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = fontCss;
+    defs.appendChild(style);
+
     const canvas = document.createElement("canvas");
-    canvas.width  = W || 400;
-    canvas.height = SVG_H;
-    const ctx  = canvas.getContext("2d")!;
-    const img  = new Image();
-    const blob = new Blob([svg.outerHTML], { type: "image/svg+xml" });
+    canvas.width  = (W || 400) * SCALE;
+    canvas.height = SVG_H * SCALE;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(SCALE, SCALE);
+
+    const svgBlob = new Blob([new XMLSerializer().serializeToString(svgEl)], { type: "image/svg+xml" });
+    const img = new Image();
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
       const a    = document.createElement("a");
@@ -101,7 +147,7 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
       a.click();
       URL.revokeObjectURL(img.src);
     };
-    img.src = URL.createObjectURL(blob);
+    img.src = URL.createObjectURL(svgBlob);
   }
 
   return (

@@ -8,6 +8,7 @@ import type { MapReference } from "../../../models/map";
 import type { StreetConfig } from "../../../models/street";
 import type { MapLayer, MapMode, InspectResult } from "../../../models/explore";
 import { fetchOsmStreetAt } from "../../../osm/fetch";
+import { interpretOsmTags } from "../../../osm/interpreter";
 import { osmTagsToStreetConfig } from "../../../osm/mapper";
 import type { Tab } from "../../Sidebar";
 import {
@@ -119,6 +120,13 @@ export function ExploreTab({
     }
   }
 
+  function handleGenerateFromInspect() {
+    if (!inspectResult) return;
+    const street = osmTagsToStreetConfig(inspectResult.rawTags as Record<string, string | undefined>);
+    onStreetGenerated(street);
+    requestAnimationFrame(() => onTabChange("design"));
+  }
+
   // ── Inspect helper ────────────────────────────────────────────────────────
 
   async function handleInspect(lat: number, lng: number) {
@@ -128,19 +136,14 @@ export function ExploreTab({
     try {
       const tags = await fetchOsmStreetAt(lat, lng);
       if (!tags) {
-        setInspectResult({ summary: {}, rawTags: {} });
+        setInspectResult(null);
         return;
       }
       const rawTags = Object.fromEntries(
         Object.entries(tags).filter(([, v]) => v !== undefined) as [string, string][]
       );
       setInspectResult({
-        summary: {
-          name:     rawTags.name,
-          lanes:    rawTags.lanes ? Number(rawTags.lanes) : undefined,
-          maxspeed: rawTags.maxspeed,
-          surface:  rawTags.surface,
-        },
+        interpreted: interpretOsmTags(tags),
         rawTags,
       });
     } catch {
@@ -259,6 +262,7 @@ export function ExploreTab({
       </div>
 
       {/* Layer toggle + map visibility */}
+      <span className="text-xs text-muted-foreground">{t("basemapsLabel")}</span>
       <div className="flex gap-1 items-center">
         <button
           className={mapLayer === "osm" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
@@ -282,6 +286,7 @@ export function ExploreTab({
       </div>
 
       {/* Mode + utility toolbar */}
+      <span className="text-xs text-muted-foreground">{t("toolsLabel")}</span>
       <div className={TOOLBAR_ROW}>
         {modeBtn("mark-section", t("mapModeMarkSection"))}
         {modeBtn("measure",      t("mapModeMeasure"))}
@@ -335,25 +340,118 @@ export function ExploreTab({
 
       {/* Inspect results */}
       {mapMode === "inspect" && inspectResult && (
-        <div className="rounded border border-border p-2 text-xs flex flex-col gap-1">
+        <div className="rounded border border-border p-2 text-xs flex flex-col gap-2">
           {Object.keys(inspectResult.rawTags).length === 0 ? (
             <span className="text-muted-foreground">{t("inspectNoData")}</span>
           ) : (
             <>
+              {/* Road basics */}
               <div className="flex flex-col gap-0.5">
-                {inspectResult.summary.name     && <span><strong>{lang === "de" ? "Name" : "Name"}:</strong> {inspectResult.summary.name}</span>}
-                {inspectResult.summary.lanes    && <span><strong>{lang === "de" ? "Fahrspuren" : "Lanes"}:</strong> {inspectResult.summary.lanes}</span>}
-                {inspectResult.summary.maxspeed && <span><strong>{lang === "de" ? "Tempo" : "Speed"}:</strong> {inspectResult.summary.maxspeed}</span>}
-                {inspectResult.summary.surface  && <span><strong>{lang === "de" ? "Oberfläche" : "Surface"}:</strong> {inspectResult.summary.surface}</span>}
+                {inspectResult.interpreted.name && (
+                  <span className="font-semibold">{inspectResult.interpreted.name}</span>
+                )}
+                <span className="text-muted-foreground">
+                  {[
+                    inspectResult.interpreted.highway,
+                    inspectResult.interpreted.width_m != null ? `${inspectResult.interpreted.width_m} m` : undefined,
+                    inspectResult.interpreted.maxspeed != null ? `${inspectResult.interpreted.maxspeed} km/h` : undefined,
+                    inspectResult.interpreted.surface,
+                  ].filter(Boolean).join(" · ")}
+                </span>
               </div>
+
+              {/* Lanes */}
+              <div className="flex flex-col gap-0.5">
+                <span className="font-medium">{lang === "de" ? "Fahrspuren" : "Lanes"}</span>
+                <span className="text-muted-foreground">
+                  {inspectResult.interpreted.lanes.total}
+                  {inspectResult.interpreted.lanes.oneway && (
+                    <> · {lang === "de" ? "Einbahnstraße" : "oneway"}
+                    {inspectResult.interpreted.lanes.bicycleExemptFromOneway && (
+                      <> ({lang === "de" ? "Rad frei" : "cyclists ok"})</>
+                    )}</>
+                  )}
+                </span>
+              </div>
+
+              {/* Cycling */}
+              {(inspectResult.interpreted.cycleway.left !== "none" ||
+                inspectResult.interpreted.cycleway.right !== "none" ||
+                inspectResult.interpreted.bicycleRoad) && (
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium">{lang === "de" ? "Radverkehr" : "Cycling"}</span>
+                  {inspectResult.interpreted.bicycleRoad && (
+                    <span className="text-muted-foreground">{lang === "de" ? "Fahrradstraße" : "Bicycle road"}</span>
+                  )}
+                  {inspectResult.interpreted.cycleway.left !== "none" && (
+                    <span className="text-muted-foreground">
+                      {lang === "de" ? "links" : "left"}: {inspectResult.interpreted.cycleway.left}
+                    </span>
+                  )}
+                  {inspectResult.interpreted.cycleway.right !== "none" && (
+                    <span className="text-muted-foreground">
+                      {lang === "de" ? "rechts" : "right"}: {inspectResult.interpreted.cycleway.right}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Parking */}
+              {(inspectResult.interpreted.parking.left.type !== "none" ||
+                inspectResult.interpreted.parking.right.type !== "none") && (
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium">{lang === "de" ? "Parken" : "Parking"}</span>
+                  {(["left", "right"] as const).map((s) => {
+                    const p = inspectResult.interpreted.parking[s];
+                    if (p.type === "none") return null;
+                    return (
+                      <span key={s} className="text-muted-foreground">
+                        {lang === "de" ? (s === "left" ? "links" : "rechts") : s}: {p.type}
+                        {p.orientation && ` · ${p.orientation}`}
+                        {p.fee === true && ` · ${lang === "de" ? "kostenpflichtig" : "fee"}`}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Sidewalk */}
+              {(inspectResult.interpreted.sidewalk.left !== "no" ||
+                inspectResult.interpreted.sidewalk.right !== "no") && (
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-medium">{lang === "de" ? "Gehweg" : "Sidewalk"}</span>
+                  {inspectResult.interpreted.sidewalk.left === inspectResult.interpreted.sidewalk.right ? (
+                    <span className="text-muted-foreground">
+                      {lang === "de" ? "beidseitig" : "both"} ({inspectResult.interpreted.sidewalk.left})
+                    </span>
+                  ) : (
+                    <>
+                      {inspectResult.interpreted.sidewalk.left !== "no" && (
+                        <span className="text-muted-foreground">
+                          {lang === "de" ? "links" : "left"}: {inspectResult.interpreted.sidewalk.left}
+                        </span>
+                      )}
+                      {inspectResult.interpreted.sidewalk.right !== "no" && (
+                        <span className="text-muted-foreground">
+                          {lang === "de" ? "rechts" : "right"}: {inspectResult.interpreted.sidewalk.right}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Raw tags toggle */}
               <button
-                className="text-left text-muted-foreground hover:text-foreground underline mt-1"
+                className="text-left text-muted-foreground hover:text-foreground underline"
                 onClick={() => setTagsExpanded((v) => !v)}
               >
-                {tagsExpanded ? t("inspectTagsHide") : t("inspectTags")}
+                {tagsExpanded
+                  ? t("inspectTagsHide")
+                  : `${t("inspectTags")} (${Object.keys(inspectResult.rawTags).length})`}
               </button>
               {tagsExpanded && (
-                <div className="mt-1 flex flex-col gap-0.5 max-h-40 overflow-y-auto">
+                <div className="flex flex-col gap-0.5 max-h-40 overflow-y-auto">
                   {Object.entries(inspectResult.rawTags).map(([k, v]) => (
                     <div key={k} className="flex gap-1">
                       <span className="text-muted-foreground shrink-0">{k}:</span>
@@ -362,6 +460,14 @@ export function ExploreTab({
                   ))}
                 </div>
               )}
+
+              {/* Generate from here */}
+              <Button
+                size="sm" className="h-7 text-xs w-full mt-1"
+                onClick={handleGenerateFromInspect}
+              >
+                {t("generateSection")}
+              </Button>
             </>
           )}
         </div>
