@@ -5,7 +5,7 @@ import { getElementDef } from "../../elements/registry";
 import { computeLayout, BAND_H, ANN_H } from "./renderer";
 import { getFigureVariants } from "../../figures/registry";
 import type { TemplateOption } from "../../templates";
-import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP, THEME_SELECT } from "./styles";
+import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./styles";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
@@ -188,8 +188,9 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
     <div className={CROSS_SECTION_VIEW}>
       <div className={CSV_HEADER}>
         <div className={CSV_CONTROLS}>
+          {/* Template select — hidden on mobile */}
           <select
-            className="h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground"
+            className="hidden lg:block h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground shrink-0"
             defaultValue=""
             onChange={(e) => {
               const tpl = templates.find((t) => t.id === e.target.value);
@@ -202,9 +203,11 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
               <option key={tpl.id} value={tpl.id}>{tpl.label[lang]}</option>
             ))}
           </select>
-          <span className="text-xs text-muted-foreground">{lang === "de" ? "Stil" : "Style"}</span>
+          {/* "Style" label — hidden on mobile */}
+          <span className="hidden lg:inline text-xs text-muted-foreground shrink-0">{lang === "de" ? "Stil" : "Style"}</span>
+          {/* Theme select — full on desktop, shrinks on mobile */}
           <select
-            className={THEME_SELECT}
+            className="min-w-0 flex-1 lg:flex-none h-7 rounded border border-input bg-background px-1 text-xs text-foreground"
             value={theme}
             onChange={(e) => setTheme(e.target.value as SvgTheme)}
           >
@@ -212,13 +215,14 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
               <option key={th.value} value={th.value}>{th.label[lang]}</option>
             ))}
           </select>
-          <div className="flex items-center gap-0.5 ml-2 border border-border rounded">
+          <div className="flex items-center gap-0.5 border border-border rounded shrink-0">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title="Zoom in"><ZoomIn size={12} /></Button>
             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title="Fit"><Maximize2 size={11} /></Button>
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title="Zoom out"><ZoomOut size={12} /></Button>
           </div>
+          {/* Export — icon-only on mobile, labelled on desktop */}
           <select
-            className="ml-auto h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground cursor-pointer"
+            className="shrink-0 h-7 w-8 lg:w-auto appearance-none rounded border border-input bg-background text-xs text-foreground text-center cursor-pointer lg:px-1.5"
             defaultValue=""
             data-tour="export-btn"
             onChange={(e) => {
@@ -229,9 +233,7 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
               else if (fmt === "json") exportJson();
             }}
           >
-            <option value="" disabled>
-              {lang === "de" ? "↓ Exportieren" : "↓ Export"}
-            </option>
+            <option value="" disabled>↓</option>
             <option value="png">PNG</option>
             <option value="svg">SVG</option>
             <option value="json">JSON</option>
