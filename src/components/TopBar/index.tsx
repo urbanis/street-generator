@@ -56,15 +56,26 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
         <div className={TOOLBAR_SECTION}>
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={handleImport}>
             <FileUp size={12} />
-            {t("importJson")}
+            <span className="hidden lg:inline">{t("importJson")}</span>
           </Button>
 
           <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={onShare}>
             {shareCopied ? <Check size={12} className="text-green-600" /> : <Share2 size={12} />}
-            {shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : t("share")}
+            <span className="hidden lg:inline">{shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : t("share")}</span>
           </Button>
 
-          <div className="flex items-center gap-0.5 ml-1">
+          {/* Mobile: compact select */}
+          <select
+            className="lg:hidden h-7 px-1 text-xs text-muted-foreground bg-background border-0 rounded cursor-pointer"
+            value={lang}
+            onChange={(e) => onLangChange(e.target.value as "de" | "en")}
+            aria-label="Language"
+          >
+            <option value="de">DE</option>
+            <option value="en">EN</option>
+          </select>
+          {/* Desktop: button pair */}
+          <div className="hidden lg:flex items-center gap-0.5 ml-1">
             <button className={lang === "de" ? LANG_ACTIVE : LANG_INACTIVE} onClick={() => onLangChange("de")}>DE</button>
             <button className={lang === "en" ? LANG_ACTIVE : LANG_INACTIVE} onClick={() => onLangChange("en")}>EN</button>
           </div>

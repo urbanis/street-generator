@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Group as PanelGroup, Panel, Separator as PanelResizeHandle } from "react-resizable-panels";
 import type { StreetConfig } from "./models/street";
 import type { MapReference } from "./models/map";
 import { runValidation } from "./rules/engine";
@@ -146,64 +145,67 @@ export default function App() {
           onDocsClose={() => setDocsOpen(false)}
           onReplayTour={handleReplayTour}
         />
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            street={street}
-            onStreetChange={setStreet}
-            highlightedIds={highlightedIds}
-            results={results}
-            mapReference={mapReference}
-            onReferenceSet={setMapReference}
-            onStreetGenerated={handleStreetGenerated}
-            osmDisclaimer={osmDisclaimer}
-            onClearOsmDisclaimer={() => setOsmDisclaimer(false)}
-            mapLayer={mapLayer}
-            mapMode={mapMode}
-            onMapLayerChange={setMapLayer}
-            onMapModeChange={setMapMode}
-            onSectionLineChange={setSectionLine}
-            onMeasurePointsChange={setMeasurePoints}
-            onRegisterMapClick={(fn) => setOnMapClick(() => fn ?? undefined)}
-            onOpenDocs={() => setDocsOpen(true)}
-            mapVisible={mapVisible}
-            onToggleMap={() => setMapVisible((v) => !v)}
-            onShowMap={() => setMapVisible(true)}
-            showAllFigures={showAllFigures}
-            onShowAllFiguresChange={setShowAllFigures}
-          />
+        {/* Mobile: single-column scroll stack (CrossSection → Sidebar → Map).
+            Desktop: two-column grid — sidebar left spanning both rows,
+            CrossSection top-right, Map bottom-right. */}
+        <div className="flex-1 grid grid-cols-1 overflow-y-auto lg:h-full lg:grid-cols-[24rem_1fr] lg:grid-rows-[1fr_1fr] lg:overflow-hidden">
 
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <PanelGroup orientation="vertical" defaultLayout={{ "cross-section": 50, "map": 50 }}>
-              <Panel id="cross-section" defaultSize={50} minSize={20}>
-                <CrossSectionView
-                  street={street}
-                  highlightedIds={highlightedIds}
-                  templates={TEMPLATES}
-                  onTemplateApply={handleTemplateApply}
-                  showAllFigures={showAllFigures}
-                />
-              </Panel>
-              {mapVisible && (
-                <>
-                  <PanelResizeHandle className="h-1 bg-border hover:bg-primary/40 transition-colors cursor-row-resize" />
-                  <Panel id="map" defaultSize={50} minSize={20}>
-                    <MapPanel
-                      mapReference={mapReference}
-                      mapLayer={mapLayer}
-                      mapMode={mapMode}
-                      onMapClick={onMapClick}
-                      sectionLine={sectionLine}
-                      measurePoints={measurePoints}
-                      wfsLayers={wfsLayers}
-                      onWfsLayersChange={setWfsLayers}
-                    />
-                  </Panel>
-                </>
-              )}
-            </PanelGroup>
+          {/* CrossSection — row 1 on mobile (DOM order), top-right on desktop */}
+          <div className={`min-h-64 overflow-hidden lg:min-h-0 lg:col-start-2 lg:row-start-1${!mapVisible ? " lg:row-span-2" : ""}`}>
+            <CrossSectionView
+              street={street}
+              highlightedIds={highlightedIds}
+              templates={TEMPLATES}
+              onTemplateApply={handleTemplateApply}
+              showAllFigures={showAllFigures}
+            />
           </div>
+
+          {/* Sidebar — row 2 on mobile (DOM order), left column spanning both rows on desktop */}
+          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:h-full">
+            <Sidebar
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              street={street}
+              onStreetChange={setStreet}
+              highlightedIds={highlightedIds}
+              results={results}
+              mapReference={mapReference}
+              onReferenceSet={setMapReference}
+              onStreetGenerated={handleStreetGenerated}
+              osmDisclaimer={osmDisclaimer}
+              onClearOsmDisclaimer={() => setOsmDisclaimer(false)}
+              mapLayer={mapLayer}
+              mapMode={mapMode}
+              onMapLayerChange={setMapLayer}
+              onMapModeChange={setMapMode}
+              onSectionLineChange={setSectionLine}
+              onMeasurePointsChange={setMeasurePoints}
+              onRegisterMapClick={(fn) => setOnMapClick(() => fn ?? undefined)}
+              onOpenDocs={() => setDocsOpen(true)}
+              mapVisible={mapVisible}
+              onToggleMap={() => setMapVisible((v) => !v)}
+              onShowMap={() => setMapVisible(true)}
+              showAllFigures={showAllFigures}
+              onShowAllFiguresChange={setShowAllFigures}
+            />
+          </div>
+
+          {/* Map — row 3 on mobile (DOM order), bottom-right on desktop */}
+          {mapVisible && (
+            <div className="min-h-64 overflow-hidden lg:min-h-0 lg:col-start-2 lg:row-start-2">
+              <MapPanel
+                mapReference={mapReference}
+                mapLayer={mapLayer}
+                mapMode={mapMode}
+                onMapClick={onMapClick}
+                sectionLine={sectionLine}
+                measurePoints={measurePoints}
+                wfsLayers={wfsLayers}
+                onWfsLayersChange={setWfsLayers}
+              />
+            </div>
+          )}
         </div>
       </div>
       {showWelcome && (
