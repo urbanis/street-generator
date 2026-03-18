@@ -64,7 +64,7 @@ export default function App() {
   const [onMapClick,    setOnMapClick]    = useState<((lat: number, lng: number) => void) | undefined>();
   const [wfsLayers,     setWfsLayers]     = useState<WfsLayer[]>(DEFAULT_WFS_LAYERS);
   const [docsOpen,      setDocsOpen]      = useState(false);
-  const [mapVisible,    setMapVisible]    = useState(true);
+  const [mapVisible,    setMapVisible]    = useState(false);
   const [showAllFigures, setShowAllFigures] = useState(true);
   const [showWelcome, setShowWelcome] = useState<boolean>(
     () => !localStorage.getItem(TOUR_KEY)
