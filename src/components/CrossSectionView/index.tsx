@@ -88,23 +88,30 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
     }));
   }
 
+  function triggerDownload(url: string, filename: string) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   async function exportSvg() {
     if (!svgRef.current) return;
     const svgEl = svgRef.current.cloneNode(true) as SVGSVGElement;
     await inlineImages(svgEl);
     const blob = new Blob([new XMLSerializer().serializeToString(svgEl)], { type: "image/svg+xml" });
-    const a    = document.createElement("a");
-    a.href     = URL.createObjectURL(blob);
-    a.download = `${street.name || "street"}.svg`;
-    a.click();
+    const url  = URL.createObjectURL(blob);
+    triggerDownload(url, `${street.name || "street"}.svg`);
+    URL.revokeObjectURL(url);
   }
 
   function exportJson() {
     const blob = new Blob([JSON.stringify(street, null, 2)], { type: "application/json" });
-    const a    = document.createElement("a");
-    a.href     = URL.createObjectURL(blob);
-    a.download = `${street.name || "street"}.json`;
-    a.click();
+    const url  = URL.createObjectURL(blob);
+    triggerDownload(url, `${street.name || "street"}.json`);
+    URL.revokeObjectURL(url);
   }
 
   async function exportPng() {
@@ -162,16 +169,19 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
     ctx.scale(SCALE, SCALE);
 
     const svgBlob = new Blob([new XMLSerializer().serializeToString(svgEl)], { type: "image/svg+xml" });
-    const img = new Image();
+    const imgSrc  = URL.createObjectURL(svgBlob);
+    const img     = new Image();
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
-      const a    = document.createElement("a");
-      a.href     = canvas.toDataURL("image/png");
-      a.download = `${street.name || "street"}.png`;
-      a.click();
-      URL.revokeObjectURL(img.src);
+      URL.revokeObjectURL(imgSrc);
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        triggerDownload(url, `${street.name || "street"}.png`);
+        URL.revokeObjectURL(url);
+      }, "image/png");
     };
-    img.src = URL.createObjectURL(svgBlob);
+    img.src = imgSrc;
   }
 
   return (
