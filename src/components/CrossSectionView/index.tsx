@@ -69,9 +69,28 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
     setZoom(Math.max(0.1, Math.min(z, 5)));
   }
 
-  function exportSvg() {
+  async function inlineImages(svgEl: SVGSVGElement): Promise<void> {
+    const images = svgEl.querySelectorAll("image");
+    await Promise.all(Array.from(images).map(async (img) => {
+      const href = img.getAttribute("href") || img.getAttribute("xlink:href");
+      if (!href || href.startsWith("data:")) return;
+      try {
+        const buf   = await fetch(href).then((r) => r.arrayBuffer());
+        const bytes = new Uint8Array(buf);
+        let binary  = "";
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        const b64  = btoa(binary);
+        const mime = href.endsWith(".svg") ? "image/svg+xml" : "image/png";
+        img.setAttribute("href", `data:${mime};base64,${b64}`);
+      } catch { /* skip if fetch fails */ }
+    }));
+  }
+
+  async function exportSvg() {
     if (!svgRef.current) return;
-    const blob = new Blob([svgRef.current.outerHTML], { type: "image/svg+xml" });
+    const svgEl = svgRef.current.cloneNode(true) as SVGSVGElement;
+    await inlineImages(svgEl);
+    const blob = new Blob([new XMLSerializer().serializeToString(svgEl)], { type: "image/svg+xml" });
     const a    = document.createElement("a");
     a.href     = URL.createObjectURL(blob);
     a.download = `${street.name || "street"}.svg`;
@@ -90,6 +109,7 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
     if (!svgRef.current) return;
     const SCALE = 3;
     const svgEl = svgRef.current.cloneNode(true) as SVGSVGElement;
+    await inlineImages(svgEl);
     svgEl.setAttribute("width",  String(W || 400));
     svgEl.setAttribute("height", String(SVG_H));
 
