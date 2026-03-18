@@ -4,7 +4,7 @@ export type Lang = "de" | "en";
 
 const TRANSLATIONS = {
   de: {
-    appTitle: "Berlin Querschnitt-Validator",
+    appTitle: "Strasselab",
     version: "v0.1",
     // Tabs
     tabExplore: "Erkunden",
@@ -95,7 +95,7 @@ const TRANSLATIONS = {
     figures:             "Figuren",
   },
   en: {
-    appTitle: "Berlin Cross-Section Validator",
+    appTitle: "Strasselab",
     version: "v0.1",
     tabExplore: "Explore",
     tabDesign: "Design",
