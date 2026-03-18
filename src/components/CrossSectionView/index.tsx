@@ -271,7 +271,7 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
                       x={le.x} y={GROUND_Y}
                       width={le.widthPx} height={BAND_H}
                       fill={showColor ? (def.defaultStyle.fill) : "#ffffff"}
-                      stroke="#6b7280" strokeWidth={1}
+                      stroke="#6b7280" strokeWidth={0.5}
                     />
                     {/* floors rising upward — floor 0 = ground floor = bottom */}
                     {el.building.floors.map((floor, i) => {
@@ -317,7 +317,7 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
                   <rect
                     x={le.x} y={GROUND_Y}
                     width={le.widthPx} height={BAND_H}
-                    fill={fill} stroke={stroke} strokeWidth={1}
+                    fill={fill} stroke={stroke} strokeWidth={0.5}
                   />
                   {isHighlighted && (
                     <rect
@@ -352,40 +352,70 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
               );
             })}
 
-            {/* Annotation zone — tick + name + measurement per element */}
-            {layout.elements.map((le) => {
-              const el        = street.elements.find((e) => e.id === le.id)!;
-              if (el.type === "BUILDING_LEFT" || el.type === "BUILDING_RIGHT") return null;
-              const def       = getElementDef(el.type);
-              const cx        = le.x + le.widthPx / 2;
-              const tickY1    = GROUND_Y + BAND_H;
-              const tickY2    = tickY1 + 6;
-              const nameY     = tickY2 + 13;
-              const measureY  = nameY + 14;
-              const tooNarrow = le.widthPx < 20;
+            {/* Annotation zone — engineering dimension lines */}
+            {(() => {
+              const bandBottom = GROUND_Y + BAND_H;
+              const TICK_H     = 14; // vertical tick height
+              const dimLineY   = bandBottom + TICK_H;
+              const labelY     = dimLineY + 12;
+              const totalLineY = dimLineY + 46;
+
+              const streetEls = layout.elements.filter((le) => {
+                const el = street.elements.find((e) => e.id === le.id)!;
+                return el.type !== "BUILDING_LEFT" && el.type !== "BUILDING_RIGHT";
+              });
+              const totalX1      = streetEls.length > 0 ? streetEls[0].x : 0;
+              const totalX2      = streetEls.length > 0 ? streetEls[streetEls.length - 1].x + streetEls[streetEls.length - 1].widthPx : W;
+              const totalWidth_m = street.elements
+                .filter((e) => e.type !== "BUILDING_LEFT" && e.type !== "BUILDING_RIGHT")
+                .reduce((s, e) => s + e.width_m, 0);
 
               return (
-                <g key={`ann-${el.id}`}>
-                  {!tooNarrow && <line x1={cx} y1={tickY1} x2={cx} y2={tickY2} stroke="#9ca3af" strokeWidth={1} />}
-                  {!tooNarrow && showNames && (
-                    <text
-                      x={cx} y={nameY}
-                      textAnchor="middle" fontSize={9} fill="#374151"
-                    >
-                      {el.label || def.label[lang]}
-                    </text>
+                <>
+                  {layout.elements.map((le) => {
+                    const el        = street.elements.find((e) => e.id === le.id)!;
+                    if (el.type === "BUILDING_LEFT" || el.type === "BUILDING_RIGHT") return null;
+                    const def       = getElementDef(el.type);
+                    const cx        = le.x + le.widthPx / 2;
+                    const tooNarrow = le.widthPx < 20;
+                    return (
+                      <g key={`ann-${el.id}`}>
+                        {/* Left tick */}
+                        <line x1={le.x}              y1={bandBottom} x2={le.x}              y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                        {/* Right tick */}
+                        <line x1={le.x + le.widthPx} y1={bandBottom} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                        {/* Horizontal dimension line */}
+                        <line x1={le.x} y1={dimLineY} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                        {/* Measurement — above dim line */}
+                        {!tooNarrow && showMeasure && (
+                          <text x={cx} y={dimLineY - 3} textAnchor="middle" dominantBaseline="auto" fontSize={8} fill="#6b7280">
+                            {el.width_m.toFixed(2)} m
+                          </text>
+                        )}
+                        {/* Label — below dim line */}
+                        {!tooNarrow && showNames && (
+                          <text x={cx} y={labelY} textAnchor="middle" dominantBaseline="hanging" fontSize={9} fill="#374151">
+                            {el.label || def.label[lang]}
+                          </text>
+                        )}
+                      </g>
+                    );
+                  })}
+
+                  {/* Total street width dimension line */}
+                  {showMeasure && streetEls.length > 0 && (
+                    <g>
+                      <line x1={totalX1} y1={totalLineY} x2={totalX2} y2={totalLineY} stroke="#6b7280" strokeWidth={0.5} />
+                      <line x1={totalX1} y1={totalLineY - 5} x2={totalX1} y2={totalLineY + 5} stroke="#6b7280" strokeWidth={0.5} />
+                      <line x1={totalX2} y1={totalLineY - 5} x2={totalX2} y2={totalLineY + 5} stroke="#6b7280" strokeWidth={0.5} />
+                      <text x={(totalX1 + totalX2) / 2} y={totalLineY - 3} textAnchor="middle" dominantBaseline="auto" fontSize={8} fill="#6b7280">
+                        {totalWidth_m.toFixed(2)} m
+                      </text>
+                    </g>
                   )}
-                  {!tooNarrow && showMeasure && (
-                    <text
-                      x={cx} y={measureY}
-                      textAnchor="middle" fontSize={9} fill="#6b7280"
-                    >
-                      {el.width_m.toFixed(2)} m
-                    </text>
-                  )}
-                </g>
+                </>
               );
-            })}
+            })()}
 
             {/* Vertical separator lines between elements on the ground band */}
             {layout.elements.map((le) => (
