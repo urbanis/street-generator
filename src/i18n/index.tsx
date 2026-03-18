@@ -92,6 +92,7 @@ const TRANSLATIONS = {
     showFigure:          "Figur anzeigen",
     figureVariant:       "Variante",
     figureHeight:        "Baumhöhe",
+    figures:             "Figuren",
   },
   en: {
     appTitle: "Berlin Cross-Section Validator",
@@ -171,6 +172,7 @@ const TRANSLATIONS = {
     showFigure:          "Show figure",
     figureVariant:       "Variant",
     figureHeight:        "Tree height",
+    figures:             "Figures",
   },
 } as const;
 

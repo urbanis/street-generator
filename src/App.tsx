@@ -51,6 +51,7 @@ export default function App() {
   const [wfsLayers,     setWfsLayers]     = useState<WfsLayer[]>(DEFAULT_WFS_LAYERS);
   const [docsOpen,      setDocsOpen]      = useState(false);
   const [mapVisible,    setMapVisible]    = useState(true);
+  const [showAllFigures, setShowAllFigures] = useState(true);
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
@@ -115,6 +116,8 @@ export default function App() {
             mapVisible={mapVisible}
             onToggleMap={() => setMapVisible((v) => !v)}
             onShowMap={() => setMapVisible(true)}
+            showAllFigures={showAllFigures}
+            onShowAllFiguresChange={setShowAllFigures}
           />
 
           <div className="flex flex-1 flex-col overflow-hidden">
@@ -125,6 +128,7 @@ export default function App() {
                   highlightedIds={highlightedIds}
                   templates={TEMPLATES}
                   onTemplateApply={handleTemplateApply}
+                  showAllFigures={showAllFigures}
                 />
               </Panel>
               {mapVisible && (

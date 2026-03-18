@@ -44,9 +44,10 @@ interface CrossSectionViewProps {
   highlightedIds:   string[];
   templates:        TemplateOption[];
   onTemplateApply:  (tpl: TemplateOption) => void;
+  showAllFigures:   boolean;
 }
 
-export function CrossSectionView({ street, highlightedIds, templates, onTemplateApply }: CrossSectionViewProps) {
+export function CrossSectionView({ street, highlightedIds, templates, onTemplateApply, showAllFigures }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const [theme, setTheme]                      = useState<SvgTheme>("outline-label-measure");
   const [zoom, setZoom]                        = useState(1);
@@ -297,7 +298,7 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
             })}
 
             {/* Figure rendering pass — line-art figures above ground band */}
-            {layout.elements.map((le) => {
+            {showAllFigures && layout.elements.map((le) => {
               const el = street.elements.find((e) => e.id === le.id)!;
               if (!el.figure?.show) return null;
               if (le.widthPx < 1.5 * layout.scale) return null; // too narrow

@@ -16,6 +16,8 @@ interface DesignTabProps {
   highlightedIds: string[];
   osmDisclaimer: boolean;
   onClearOsmDisclaimer: () => void;
+  showAllFigures:          boolean;
+  onShowAllFiguresChange:  (v: boolean) => void;
 }
 
 function sortBuildingsToEdges(elements: StreetElement[]): StreetElement[] {
@@ -25,7 +27,7 @@ function sortBuildingsToEdges(elements: StreetElement[]): StreetElement[] {
   return [...left, ...middle, ...right];
 }
 
-export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer }: DesignTabProps) {
+export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer, showAllFigures, onShowAllFiguresChange }: DesignTabProps) {
   const t    = useT();
   const lang = useLang();
   const [dragIndex, setDragIndex]       = useState<number | null>(null);
@@ -116,6 +118,26 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
           onAdd={addElement}
           existingTypes={street.elements.map((e) => e.type)}
         />
+      </div>
+
+      <div className="flex items-center justify-between border-b border-border pb-2">
+        <span className="text-xs text-muted-foreground">
+          {t("figures")}
+        </span>
+        <button
+          role="switch"
+          aria-checked={showAllFigures}
+          onClick={() => onShowAllFiguresChange(!showAllFigures)}
+          className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none ${
+            showAllFigures ? "bg-primary" : "bg-input"
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-3 w-3 rounded-full bg-background shadow-lg ring-0 transition-transform ${
+              showAllFigures ? "translate-x-4" : "translate-x-0"
+            }`}
+          />
+        </button>
       </div>
 
       {street.elements.length > 0 && (

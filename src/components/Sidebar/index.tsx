@@ -35,6 +35,8 @@ interface SidebarProps {
   mapVisible:            boolean;
   onToggleMap:           () => void;
   onShowMap:             () => void;
+  showAllFigures:          boolean;
+  onShowAllFiguresChange:  (v: boolean) => void;
 }
 
 export function Sidebar({
@@ -44,6 +46,7 @@ export function Sidebar({
   mapLayer, mapMode, onMapLayerChange, onMapModeChange,
   onSectionLineChange, onMeasurePointsChange, onRegisterMapClick, onOpenDocs,
   mapVisible, onToggleMap, onShowMap,
+  showAllFigures, onShowAllFiguresChange,
 }: SidebarProps) {
   const t = useT();
 
@@ -87,6 +90,8 @@ export function Sidebar({
           highlightedIds={highlightedIds}
           osmDisclaimer={osmDisclaimer}
           onClearOsmDisclaimer={onClearOsmDisclaimer}
+          showAllFigures={showAllFigures}
+          onShowAllFiguresChange={onShowAllFiguresChange}
         />
       </div>
       <div className={`${TAB_CONTENT} ${activeTab === "evaluate" ? "" : "hidden"}`}>
