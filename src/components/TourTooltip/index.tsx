@@ -5,7 +5,7 @@ import type { Lang } from "../../i18n";
 export interface TourStep {
   target: string;
   emoji:  string;
-  tab?:   "design" | "explore";
+  tab?:   "design" | "explore" | "evaluate";
   title:  { de: string; en: string };
   body:   { de: string; en: string };
 }
