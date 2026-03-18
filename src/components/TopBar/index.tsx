@@ -17,9 +17,10 @@ interface TopBarProps {
   shareCopied: boolean;
   docsOpen: boolean;
   onDocsClose: () => void;
+  onReplayTour: () => void;
 }
 
-export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopied, docsOpen, onDocsClose }: TopBarProps) {
+export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopied, docsOpen, onDocsClose, onReplayTour }: TopBarProps) {
   const t = useT();
 
   function handleImport() {
@@ -67,6 +68,14 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
             <button className={lang === "de" ? LANG_ACTIVE : LANG_INACTIVE} onClick={() => onLangChange("de")}>DE</button>
             <button className={lang === "en" ? LANG_ACTIVE : LANG_INACTIVE} onClick={() => onLangChange("en")}>EN</button>
           </div>
+          <button
+            onClick={onReplayTour}
+            className={LANG_INACTIVE}
+            title={lang === "de" ? "Tour neu starten" : "Replay tour"}
+            aria-label={lang === "de" ? "Tour neu starten" : "Replay tour"}
+          >
+            ?
+          </button>
         </div>
       </div>
 

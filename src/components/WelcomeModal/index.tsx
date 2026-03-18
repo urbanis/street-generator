@@ -25,7 +25,7 @@ export function WelcomeModal({ lang, onLangChange, onStart, onSkip }: WelcomeMod
       role="dialog"
       aria-modal="true"
       aria-labelledby="welcome-modal-title"
-      className={`fixed inset-0 z-[3100] flex items-center justify-center bg-[#CC0000] transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
+      className={`fixed inset-0 z-[3100] flex items-center justify-center bg-[#B22222] transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
     >
       <div className="flex flex-col items-center gap-6 text-white text-center px-8 max-w-sm">
         <span className="text-5xl">🗺️</span>
@@ -41,17 +41,17 @@ export function WelcomeModal({ lang, onLangChange, onStart, onSkip }: WelcomeMod
         <div className="flex items-center gap-1 self-center">
           <button
             onClick={() => onLangChange("de")}
-            className={`px-3 py-1 rounded text-sm font-semibold transition-colors ${lang === "de" ? "bg-white text-[#CC0000]" : "text-white/60 hover:text-white"}`}
+            className={`px-3 py-1 rounded text-sm font-semibold transition-colors ${lang === "de" ? "bg-white text-[#B22222]" : "text-white/60 hover:text-white"}`}
           >DE</button>
           <button
             onClick={() => onLangChange("en")}
-            className={`px-3 py-1 rounded text-sm font-semibold transition-colors ${lang === "en" ? "bg-white text-[#CC0000]" : "text-white/60 hover:text-white"}`}
+            className={`px-3 py-1 rounded text-sm font-semibold transition-colors ${lang === "en" ? "bg-white text-[#B22222]" : "text-white/60 hover:text-white"}`}
           >EN</button>
         </div>
         <div className="flex flex-col gap-2 w-full">
           <button
             onClick={onStart}
-            className="w-full py-2 px-4 bg-white text-[#CC0000] font-semibold rounded text-sm hover:bg-white/90 transition-colors"
+            className="w-full py-2 px-4 bg-white text-[#B22222] font-semibold rounded text-sm hover:bg-white/90 transition-colors"
           >
             {lang === "de" ? "Starten →" : "Start →"}
           </button>

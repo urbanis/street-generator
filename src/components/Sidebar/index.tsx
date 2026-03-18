@@ -58,7 +58,7 @@ export function Sidebar({
             key={tab}
             className={activeTab === tab ? TAB_BUTTON_ACTIVE : TAB_BUTTON_INACTIVE}
             onClick={() => onTabChange(tab)}
-            data-tour={tab === "design" ? "design-tab" : tab === "explore" ? "explore-tab" : undefined}
+            data-tour={tab === "design" ? "design-tab" : tab === "explore" ? "explore-tab" : tab === "evaluate" ? "evaluate-tab" : undefined}
           >
             {t(tab === "explore" ? "tabExplore" : tab === "design" ? "tabDesign" : "tabEvaluate")}
           </button>

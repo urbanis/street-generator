@@ -114,9 +114,22 @@ export default function App() {
     });
   }
 
+  function handleTourBack() {
+    setTourStep((prev) => {
+      if (prev === null || prev === 0) return prev;
+      return prev - 1;
+    });
+  }
+
   function handleTourExit() {
     localStorage.setItem(TOUR_KEY, "1");
     setTourStep(null);
+  }
+
+  function handleReplayTour() {
+    localStorage.removeItem(TOUR_KEY);
+    setTourStep(null);
+    setShowWelcome(true);
   }
 
   return (
@@ -131,6 +144,7 @@ export default function App() {
           shareCopied={shareCopied}
           docsOpen={docsOpen}
           onDocsClose={() => setDocsOpen(false)}
+          onReplayTour={handleReplayTour}
         />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar
@@ -201,6 +215,7 @@ export default function App() {
           total={TOUR_STEPS.length}
           lang={lang}
           onNext={handleTourNext}
+          onBack={handleTourBack}
           onExit={handleTourExit}
         />
       )}

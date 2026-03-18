@@ -189,8 +189,8 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
             <span className="flex items-center gap-1 text-xs text-muted-foreground mr-1">
               <Download size={11} />{lang === "de" ? "Exportieren" : "Export"}
             </span>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng}>PNG</Button>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg} data-tour="export-btn">SVG</Button>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng} data-tour="export-btn">PNG</Button>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg}>SVG</Button>
             <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportJson}>JSON</Button>
           </div>
         </div>
