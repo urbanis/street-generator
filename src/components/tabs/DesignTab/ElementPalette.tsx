@@ -12,7 +12,7 @@ export function ElementPalette({ onAdd, existingTypes = [] }: ElementPaletteProp
   const lang = useLang();
 
   return (
-    <div className={PALETTE_GRID}>
+    <div className={PALETTE_GRID} data-tour="element-palette">
       {REGISTRY.map((def) => {
         const Icon       = def.icon;
         const isBuilding = def.type === "BUILDING_LEFT" || def.type === "BUILDING_RIGHT";

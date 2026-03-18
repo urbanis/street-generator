@@ -16,8 +16,11 @@ import type { Lang } from "./i18n";
 import type { MapLayer, MapMode } from "./models/explore";
 import type { WfsLayer } from "./models/wfs";
 import { DEFAULT_WFS_LAYERS } from "./models/wfs";
+import { WelcomeModal } from "./components/WelcomeModal";
+import { TourTooltip, TOUR_STEPS } from "./components/TourTooltip";
 
 const LANG_KEY = "berlin-street-designer-lang";
+const TOUR_KEY = "berlin-street-designer-tour-done";
 
 function cloneTemplate(tpl: StreetConfig): StreetConfig {
   return { ...tpl, id: crypto.randomUUID(), elements: tpl.elements.map((e) => ({ ...e, id: crypto.randomUUID() })) };
@@ -52,9 +55,20 @@ export default function App() {
   const [docsOpen,      setDocsOpen]      = useState(false);
   const [mapVisible,    setMapVisible]    = useState(true);
   const [showAllFigures, setShowAllFigures] = useState(true);
+  const [showWelcome, setShowWelcome] = useState<boolean>(
+    () => !localStorage.getItem(TOUR_KEY)
+  );
+  const [tourStep, setTourStep] = useState<number | null>(null);
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
+
+  // Switch sidebar tab when the tour step requires it
+  useEffect(() => {
+    if (tourStep === null) return;
+    const tab = TOUR_STEPS[tourStep].tab;
+    if (tab) setActiveTab(tab);
+  }, [tourStep]);
 
   function handleShare() {
     const url = encodeStreetToUrl(street);
@@ -77,6 +91,32 @@ export default function App() {
 
   function handleTemplateApply(tpl: TemplateOption) {
     setStreet(cloneTemplate(tpl.config));
+  }
+
+  function handleTourStart() {
+    setShowWelcome(false);
+    setTourStep(0);
+  }
+
+  function handleTourSkip() {
+    localStorage.setItem(TOUR_KEY, "1");
+    setShowWelcome(false);
+  }
+
+  function handleTourNext() {
+    setTourStep((prev) => {
+      if (prev === null) return null;
+      if (prev >= TOUR_STEPS.length - 1) {
+        localStorage.setItem(TOUR_KEY, "1");
+        return null;
+      }
+      return prev + 1;
+    });
+  }
+
+  function handleTourExit() {
+    localStorage.setItem(TOUR_KEY, "1");
+    setTourStep(null);
   }
 
   return (
@@ -152,6 +192,18 @@ export default function App() {
           </div>
         </div>
       </div>
+      {showWelcome && (
+        <WelcomeModal lang={lang} onLangChange={setLang} onStart={handleTourStart} onSkip={handleTourSkip} />
+      )}
+      {tourStep !== null && (
+        <TourTooltip
+          step={tourStep}
+          total={TOUR_STEPS.length}
+          lang={lang}
+          onNext={handleTourNext}
+          onExit={handleTourExit}
+        />
+      )}
     </LangProvider>
   );
 }

@@ -162,23 +162,24 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
           <div className={EMPTY_STATE}>{t("noElements")}</div>
         ) : (
           street.elements.map((el, i) => (
-            <ElementCard
-              key={el.id}
-              element={el}
-              index={i}
-              total={street.elements.length}
-              isHighlighted={highlightedIds.includes(el.id)}
-              isDragOver={dragOverIndex === i}
-              forceOpen={allOpen}
-              onChange={(updated) => updateElement(i, updated)}
-              onMoveUp={() => moveUp(i)}
-              onMoveDown={() => moveDown(i)}
-              onRemove={() => removeElement(i)}
-              onDragStart={() => setDragIndex(i)}
-              onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
-              onDrop={() => handleDrop(i)}
-              onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
-            />
+            <div key={el.id} data-tour={i === 0 ? "element-card" : undefined}>
+              <ElementCard
+                element={el}
+                index={i}
+                total={street.elements.length}
+                isHighlighted={highlightedIds.includes(el.id)}
+                isDragOver={dragOverIndex === i}
+                forceOpen={allOpen}
+                onChange={(updated) => updateElement(i, updated)}
+                onMoveUp={() => moveUp(i)}
+                onMoveDown={() => moveDown(i)}
+                onRemove={() => removeElement(i)}
+                onDragStart={() => setDragIndex(i)}
+                onDragOver={(e) => { e.preventDefault(); setDragOverIndex(i); }}
+                onDrop={() => handleDrop(i)}
+                onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+              />
+            </div>
           ))
         )}
       </div>

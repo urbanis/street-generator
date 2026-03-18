@@ -190,13 +190,13 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
               <Download size={11} />{lang === "de" ? "Exportieren" : "Export"}
             </span>
             <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng}>PNG</Button>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg}>SVG</Button>
+            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg} data-tour="export-btn">SVG</Button>
             <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportJson}>JSON</Button>
           </div>
         </div>
       </div>
 
-      <div ref={wrapRef} className={CSV_SVG_WRAP}>
+      <div ref={wrapRef} className={CSV_SVG_WRAP} data-tour="cross-section">
         {W === 0 ? (
           <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
             {lang === "de" ? "Keine Elemente. Palette unten verwenden." : "No elements. Use the palette below."}
