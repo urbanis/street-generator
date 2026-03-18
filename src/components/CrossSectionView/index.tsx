@@ -1,13 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLang } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import { getElementDef } from "../../elements/registry";
 import { computeLayout, BAND_H, ANN_H } from "./renderer";
 import { getFigureVariants } from "../../figures/registry";
 import type { TemplateOption } from "../../templates";
-import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP, THEME_SELECT, EXPORT_BTN } from "./styles";
+import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP, THEME_SELECT } from "./styles";
 import { Button } from "@/components/ui/button";
-import { Download, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
 export type SvgTheme =
   | "full"
@@ -60,6 +60,8 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
   const NAME_H   = street.name ? 24 : 0;
   const GROUND_Y = NAME_H + layout.skyH;
   const SVG_H    = GROUND_Y + BAND_H + ANN_H;
+
+  useEffect(() => { fit(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function fit() {
     if (!wrapRef.current || W === 0) return;
@@ -205,14 +207,25 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title="Fit"><Maximize2 size={11} /></Button>
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title="Zoom out"><ZoomOut size={12} /></Button>
           </div>
-          <div className="flex items-center gap-1 ml-auto">
-            <span className="flex items-center gap-1 text-xs text-muted-foreground mr-1">
-              <Download size={11} />{lang === "de" ? "Exportieren" : "Export"}
-            </span>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportPng} data-tour="export-btn">PNG</Button>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportSvg}>SVG</Button>
-            <Button variant="outline" size="sm" className={EXPORT_BTN} onClick={exportJson}>JSON</Button>
-          </div>
+          <select
+            className="ml-auto h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground cursor-pointer"
+            defaultValue=""
+            data-tour="export-btn"
+            onChange={(e) => {
+              const fmt = e.target.value;
+              e.target.value = "";
+              if (fmt === "png") exportPng();
+              else if (fmt === "svg") exportSvg();
+              else if (fmt === "json") exportJson();
+            }}
+          >
+            <option value="" disabled>
+              {lang === "de" ? "↓ Exportieren" : "↓ Export"}
+            </option>
+            <option value="png">PNG</option>
+            <option value="svg">SVG</option>
+            <option value="json">JSON</option>
+          </select>
         </div>
       </div>
 

@@ -17,12 +17,24 @@ import type { WfsLayer } from "./models/wfs";
 import { DEFAULT_WFS_LAYERS } from "./models/wfs";
 import { WelcomeModal } from "./components/WelcomeModal";
 import { TourTooltip, TOUR_STEPS } from "./components/TourTooltip";
+import { getDefaultFigureVariant } from "./figures/registry";
 
 const LANG_KEY = "berlin-street-designer-lang";
 const TOUR_KEY = "berlin-street-designer-tour-done";
 
+function withDefaultFigures(config: StreetConfig): StreetConfig {
+  return {
+    ...config,
+    elements: config.elements.map((e) => {
+      if (e.figure) return e;
+      const variant = getDefaultFigureVariant(e.type);
+      return variant ? { ...e, figure: { show: true, variant } } : e;
+    }),
+  };
+}
+
 function cloneTemplate(tpl: StreetConfig): StreetConfig {
-  return { ...tpl, id: crypto.randomUUID(), elements: tpl.elements.map((e) => ({ ...e, id: crypto.randomUUID() })) };
+  return withDefaultFigures({ ...tpl, id: crypto.randomUUID(), elements: tpl.elements.map((e) => ({ ...e, id: crypto.randomUUID() })) });
 }
 
 function getDefaultStreet(): StreetConfig {
@@ -84,7 +96,7 @@ export default function App() {
   );
 
   function handleStreetGenerated(generated: StreetConfig) {
-    setStreet(generated);
+    setStreet(withDefaultFigures(generated));
     setOsmDisclaimer(true);
   }
 
@@ -138,7 +150,7 @@ export default function App() {
           lang={lang}
           onLangChange={setLang}
           street={street}
-          onStreetImport={setStreet}
+          onStreetImport={(s) => setStreet(withDefaultFigures(s))}
           onShare={handleShare}
           shareCopied={shareCopied}
           docsOpen={docsOpen}

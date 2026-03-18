@@ -3,6 +3,7 @@ import { AlertTriangle, X, ChevronsUpDown } from "lucide-react";
 import type { StreetConfig, StreetElement, ElementType } from "../../../models/street";
 import { useT, useLang } from "../../../i18n";
 import { getElementDef } from "../../../elements/registry";
+import { getDefaultFigureVariant } from "../../../figures/registry";
 import { ElementCard } from "./ElementCard";
 import { ElementPalette } from "./ElementPalette";
 import { DESIGN_TAB, DISCLAIMER, ELEMENT_LIST, EMPTY_STATE } from "./styles";
@@ -63,6 +64,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
     const def = getElementDef(type);
     const isBuilding = type === "BUILDING_LEFT" || type === "BUILDING_RIGHT";
     if (isBuilding && street.elements.some((e) => e.type === type)) return;
+    const defaultVariant = getDefaultFigureVariant(type);
     const newEl: StreetElement = {
       id:       crypto.randomUUID(),
       type,
@@ -75,6 +77,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
             { use: "Wohnen", height_m: 3 },
           ]}
         : undefined,
+      figure: defaultVariant ? { show: true, variant: defaultVariant } : undefined,
     };
     const elements = sortBuildingsToEdges([...street.elements, newEl]);
     onStreetChange({ ...street, elements });
