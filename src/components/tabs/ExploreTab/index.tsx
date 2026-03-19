@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Search, Maximize2, Trash2, MapPin, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import { Search, MapPin, ExternalLink, Eye, EyeOff, Crosshair, Ruler, ScanSearch, Maximize2, Trash2 } from "lucide-react";
 import L from "leaflet";
 import { useT, useLang } from "../../../i18n";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,8 @@ import { interpretOsmTags } from "../../../osm/interpreter";
 import { osmTagsToStreetConfig } from "../../../osm/mapper";
 import type { Tab } from "../../Sidebar";
 import {
-  EXPLORE_TAB, SEARCH_INPUT, TOOLBAR_ROW, MODE_BUTTON_ACTIVE, MODE_BUTTON_INACTIVE, ERROR_BOX,
+  EXPLORE_TAB, SEARCH_INPUT, MODE_BUTTON_ACTIVE, MODE_BUTTON_INACTIVE, ERROR_BOX,
+  TOOL_CARD_ACTIVE, TOOL_CARD_INACTIVE, TOOL_ICON_WRAP,
 } from "./styles";
 
 interface ExploreTabProps {
@@ -30,6 +31,7 @@ interface ExploreTabProps {
   mapVisible:            boolean;
   onToggleMap:           () => void;
   onShowMap:             () => void;
+  onFitMap:              () => void;
 }
 
 interface NominatimResult {
@@ -42,7 +44,7 @@ export function ExploreTab({
   mapReference, onReferenceSet, onStreetGenerated, onTabChange,
   mapLayer, mapMode, onMapLayerChange, onMapModeChange,
   onSectionLineChange, onMeasurePointsChange, onRegisterMapClick,
-  mapVisible, onToggleMap, onShowMap,
+  mapVisible, onToggleMap, onShowMap, onFitMap,
 }: ExploreTabProps) {
   const t    = useT();
   const lang = useLang();
@@ -131,6 +133,8 @@ export function ExploreTab({
 
   async function handleInspect(lat: number, lng: number) {
     setInspecting(true);
+    const mapEl = document.querySelector(".leaflet-container") as HTMLElement | null;
+    if (mapEl) mapEl.style.cursor = "wait";
     setInspectResult(null);
     setTagsExpanded(false);
     try {
@@ -150,6 +154,7 @@ export function ExploreTab({
       setOsmError(t("osmError"));
     } finally {
       setInspecting(false);
+      if (mapEl) mapEl.style.cursor = "help";
     }
   }
 
@@ -211,16 +216,32 @@ export function ExploreTab({
     if (next !== "inspect")      { setInspectResult(null); }
   }
 
-  function modeBtn(mode: MapMode, label: string) {
-    return (
-      <button
-        className={mapMode === mode ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
-        onClick={() => toggleMode(mode)}
-      >
-        {label}
-      </button>
-    );
-  }
+  const TOOLS: { mode: MapMode; icon: ReactNode; name: string; description: string }[] = [
+    {
+      mode: "mark-section",
+      icon: <Crosshair size={15} />,
+      name: lang === "de" ? "Schnittlinie" : "Section line",
+      description: lang === "de"
+        ? "Klicke zwei Punkte auf die Karte, um einen Querschnitt zu erzeugen."
+        : "Click two points on the map to generate a cross-section.",
+    },
+    {
+      mode: "measure",
+      icon: <Ruler size={15} />,
+      name: lang === "de" ? "Messen" : "Measure",
+      description: lang === "de"
+        ? "Klicke mehrere Punkte auf die Karte, um Abstände zu messen."
+        : "Click points on the map to measure distances.",
+    },
+    {
+      mode: "inspect",
+      icon: <ScanSearch size={15} />,
+      name: lang === "de" ? "Inspizieren" : "Inspect",
+      description: lang === "de"
+        ? "Klicke auf eine Straße, um ihre OSM-Daten zu sehen und einen Querschnitt zu erzeugen."
+        : "Click a street to see its OSM data and generate a cross-section.",
+    },
+  ];
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -297,191 +318,185 @@ export function ExploreTab({
         </div>
       )}
 
-      {/* Mode + utility toolbar */}
-      <span className="text-xs text-muted-foreground">{t("toolsLabel")}</span>
-      <div className={TOOLBAR_ROW}>
-        {modeBtn("mark-section", t("mapModeMarkSection"))}
-        {modeBtn("measure",      t("mapModeMeasure"))}
-        {modeBtn("inspect",      t("mapModeInspect"))}
-        <Button variant="ghost" size="icon" className="h-7 w-7" title={t("fitMap")}>
-          <Maximize2 size={13} />
-        </Button>
-        <Button
-          variant="ghost" size="icon" className="h-7 w-7" title={t("clearMap")}
-          onClick={() => { onReferenceSet(null); setSectionPoints([]); measurePtsRef.current = []; setInspectResult(null); onSectionLineChange(undefined); onMeasurePointsChange(undefined); }}
-        >
-          <Trash2 size={13} />
-        </Button>
+      {/* Tool cards */}
+      <div className="flex flex-col gap-1.5">
+        {TOOLS.map((tool) => (
+          <button
+            key={tool.mode}
+            className={mapMode === tool.mode ? TOOL_CARD_ACTIVE : TOOL_CARD_INACTIVE}
+            onClick={() => toggleMode(tool.mode)}
+            aria-pressed={mapMode === tool.mode}
+          >
+            <span className={TOOL_ICON_WRAP}>{tool.icon}</span>
+            <span className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-sm font-medium leading-none">{tool.name}</span>
+              <span className="text-xs text-muted-foreground leading-snug">{tool.description}</span>
+            </span>
+          </button>
+        ))}
       </div>
 
-      {/* Generate button (normal search mode) */}
-      {mapReference && mapMode !== "mark-section" && (
-        <Button size="sm" className="h-7 text-xs w-full" onClick={() => handleGenerate()} disabled={generating}>
-          {generating ? "…" : t("generateSection")}
-        </Button>
-      )}
+      {/* Active tool feedback — shown below active card */}
+      {mapMode !== "none" && (
+        <div className="rounded border border-border bg-muted/30 p-2.5 flex flex-col gap-2">
 
-      {/* Mark-section hint */}
-      {mapMode === "mark-section" && (
-        <p className="text-xs text-muted-foreground">
-          {lang === "de"
-            ? `${sectionPoints.length}/2 Punkte gesetzt. Klicke auf die Karte.`
-            : `${sectionPoints.length}/2 points set. Click on the map.`}
-        </p>
-      )}
-
-      {/* Measure distance readout */}
-      {mapMode === "measure" && (
-        <div className="flex items-center justify-between rounded border border-border px-2 py-1.5 text-xs">
-          <span className="text-muted-foreground">
-            {lang === "de" ? `Distanz: ${measureDist} m` : `Distance: ${measureDist} m`}
-          </span>
-          <button
-            className="text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => { measurePtsRef.current = []; onMeasurePointsChange(undefined); setMeasureDist(0); }}
-          >
-            {t("measureClear")}
-          </button>
-        </div>
-      )}
-
-      {/* Inspect loading */}
-      {mapMode === "inspect" && inspecting && (
-        <div className="text-xs text-muted-foreground px-1">…</div>
-      )}
-
-      {/* Inspect results */}
-      {mapMode === "inspect" && inspectResult && (
-        <div className="rounded border border-border p-2 text-xs flex flex-col gap-2">
-          {Object.keys(inspectResult.rawTags).length === 0 ? (
-            <span className="text-muted-foreground">{t("inspectNoData")}</span>
-          ) : (
-            <>
-              {/* Road basics */}
-              <div className="flex flex-col gap-0.5">
-                {inspectResult.interpreted.name && (
-                  <span className="font-semibold">{inspectResult.interpreted.name}</span>
-                )}
-                <span className="text-muted-foreground">
-                  {[
-                    inspectResult.interpreted.highway,
-                    inspectResult.interpreted.width_m != null ? `${inspectResult.interpreted.width_m} m` : undefined,
-                    inspectResult.interpreted.maxspeed != null ? `${inspectResult.interpreted.maxspeed} km/h` : undefined,
-                    inspectResult.interpreted.surface,
-                  ].filter(Boolean).join(" · ")}
-                </span>
-              </div>
-
-              {/* Lanes */}
-              <div className="flex flex-col gap-0.5">
-                <span className="font-medium">{lang === "de" ? "Fahrspuren" : "Lanes"}</span>
-                <span className="text-muted-foreground">
-                  {inspectResult.interpreted.lanes.total}
-                  {inspectResult.interpreted.lanes.oneway && (
-                    <> · {lang === "de" ? "Einbahnstraße" : "oneway"}
-                    {inspectResult.interpreted.lanes.bicycleExemptFromOneway && (
-                      <> ({lang === "de" ? "Rad frei" : "cyclists ok"})</>
-                    )}</>
-                  )}
-                </span>
-              </div>
-
-              {/* Cycling */}
-              {(inspectResult.interpreted.cycleway.left !== "none" ||
-                inspectResult.interpreted.cycleway.right !== "none" ||
-                inspectResult.interpreted.bicycleRoad) && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-medium">{lang === "de" ? "Radverkehr" : "Cycling"}</span>
-                  {inspectResult.interpreted.bicycleRoad && (
-                    <span className="text-muted-foreground">{lang === "de" ? "Fahrradstraße" : "Bicycle road"}</span>
-                  )}
-                  {inspectResult.interpreted.cycleway.left !== "none" && (
-                    <span className="text-muted-foreground">
-                      {lang === "de" ? "links" : "left"}: {inspectResult.interpreted.cycleway.left}
-                    </span>
-                  )}
-                  {inspectResult.interpreted.cycleway.right !== "none" && (
-                    <span className="text-muted-foreground">
-                      {lang === "de" ? "rechts" : "right"}: {inspectResult.interpreted.cycleway.right}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Parking */}
-              {(inspectResult.interpreted.parking.left.type !== "none" ||
-                inspectResult.interpreted.parking.right.type !== "none") && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-medium">{lang === "de" ? "Parken" : "Parking"}</span>
-                  {(["left", "right"] as const).map((s) => {
-                    const p = inspectResult.interpreted.parking[s];
-                    if (p.type === "none") return null;
-                    return (
-                      <span key={s} className="text-muted-foreground">
-                        {lang === "de" ? (s === "left" ? "links" : "rechts") : s}: {p.type}
-                        {p.orientation && ` · ${p.orientation}`}
-                        {p.fee === true && ` · ${lang === "de" ? "kostenpflichtig" : "fee"}`}
-                      </span>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Sidewalk */}
-              {(inspectResult.interpreted.sidewalk.left !== "no" ||
-                inspectResult.interpreted.sidewalk.right !== "no") && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-medium">{lang === "de" ? "Gehweg" : "Sidewalk"}</span>
-                  {inspectResult.interpreted.sidewalk.left === inspectResult.interpreted.sidewalk.right ? (
-                    <span className="text-muted-foreground">
-                      {lang === "de" ? "beidseitig" : "both"} ({inspectResult.interpreted.sidewalk.left})
-                    </span>
-                  ) : (
-                    <>
-                      {inspectResult.interpreted.sidewalk.left !== "no" && (
-                        <span className="text-muted-foreground">
-                          {lang === "de" ? "links" : "left"}: {inspectResult.interpreted.sidewalk.left}
-                        </span>
-                      )}
-                      {inspectResult.interpreted.sidewalk.right !== "no" && (
-                        <span className="text-muted-foreground">
-                          {lang === "de" ? "rechts" : "right"}: {inspectResult.interpreted.sidewalk.right}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Raw tags toggle */}
-              <button
-                className="text-left text-muted-foreground hover:text-foreground underline"
-                onClick={() => setTagsExpanded((v) => !v)}
-              >
-                {tagsExpanded
-                  ? t("inspectTagsHide")
-                  : `${t("inspectTags")} (${Object.keys(inspectResult.rawTags).length})`}
-              </button>
-              {tagsExpanded && (
-                <div className="flex flex-col gap-0.5 max-h-40 overflow-y-auto">
-                  {Object.entries(inspectResult.rawTags).map(([k, v]) => (
-                    <div key={k} className="flex gap-1">
-                      <span className="text-muted-foreground shrink-0">{k}:</span>
-                      <span className="break-all">{v}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Generate from here */}
-              <Button
-                size="sm" className="h-7 text-xs w-full mt-1"
-                onClick={handleGenerateFromInspect}
-              >
-                {t("generateSection")}
-              </Button>
-            </>
+          {/* Mark-section hint */}
+          {mapMode === "mark-section" && (
+            <p className="text-xs text-muted-foreground">
+              {lang === "de"
+                ? `${sectionPoints.length}/2 Punkte gesetzt. Klicke auf die Karte.`
+                : `${sectionPoints.length}/2 points set. Click on the map.`}
+            </p>
           )}
+
+          {/* Measure distance readout */}
+          {mapMode === "measure" && (
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {lang === "de" ? `Distanz: ${measureDist} m` : `Distance: ${measureDist} m`}
+              </span>
+              <button
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => { measurePtsRef.current = []; onMeasurePointsChange(undefined); setMeasureDist(0); }}
+              >
+                {t("measureClear")}
+              </button>
+            </div>
+          )}
+
+          {/* Inspect loading */}
+          {mapMode === "inspect" && inspecting && (
+            <div className="text-xs text-muted-foreground">…</div>
+          )}
+
+          {/* Inspect results */}
+          {mapMode === "inspect" && inspectResult && (
+            <div className="text-xs flex flex-col gap-2">
+              {Object.keys(inspectResult.rawTags).length === 0 ? (
+                <span className="text-muted-foreground">{t("inspectNoData")}</span>
+              ) : (
+                <>
+                  {/* Road basics */}
+                  <div className="flex flex-col gap-0.5">
+                    {inspectResult.interpreted.name && (
+                      <span className="font-semibold">{inspectResult.interpreted.name}</span>
+                    )}
+                    <span className="text-muted-foreground">
+                      {[
+                        inspectResult.interpreted.highway,
+                        inspectResult.interpreted.width_m != null ? `${inspectResult.interpreted.width_m} m` : undefined,
+                        inspectResult.interpreted.maxspeed != null ? `${inspectResult.interpreted.maxspeed} km/h` : undefined,
+                        inspectResult.interpreted.surface,
+                      ].filter(Boolean).join(" · ")}
+                    </span>
+                  </div>
+
+                  {/* Lanes */}
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-medium">{lang === "de" ? "Fahrspuren" : "Lanes"}</span>
+                    <span className="text-muted-foreground">
+                      {inspectResult.interpreted.lanes.total}
+                      {inspectResult.interpreted.lanes.oneway && (
+                        <> · {lang === "de" ? "Einbahnstraße" : "oneway"}
+                        {inspectResult.interpreted.lanes.bicycleExemptFromOneway && (
+                          <> ({lang === "de" ? "Rad frei" : "cyclists ok"})</>
+                        )}</>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Cycling */}
+                  {(inspectResult.interpreted.cycleway.left !== "none" ||
+                    inspectResult.interpreted.cycleway.right !== "none" ||
+                    inspectResult.interpreted.bicycleRoad) && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-medium">{lang === "de" ? "Radverkehr" : "Cycling"}</span>
+                      {inspectResult.interpreted.bicycleRoad && (
+                        <span className="text-muted-foreground">{lang === "de" ? "Fahrradstraße" : "Bicycle road"}</span>
+                      )}
+                      {inspectResult.interpreted.cycleway.left !== "none" && (
+                        <span className="text-muted-foreground">
+                          {lang === "de" ? "links" : "left"}: {inspectResult.interpreted.cycleway.left}
+                        </span>
+                      )}
+                      {inspectResult.interpreted.cycleway.right !== "none" && (
+                        <span className="text-muted-foreground">
+                          {lang === "de" ? "rechts" : "right"}: {inspectResult.interpreted.cycleway.right}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Parking */}
+                  {(inspectResult.interpreted.parking.left.type !== "none" ||
+                    inspectResult.interpreted.parking.right.type !== "none") && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-medium">{lang === "de" ? "Parken" : "Parking"}</span>
+                      {(["left", "right"] as const).map((s) => {
+                        const p = inspectResult.interpreted.parking[s];
+                        if (p.type === "none") return null;
+                        return (
+                          <span key={s} className="text-muted-foreground">
+                            {lang === "de" ? (s === "left" ? "links" : "rechts") : s}: {p.type}
+                            {p.orientation && ` · ${p.orientation}`}
+                            {p.fee === true && ` · ${lang === "de" ? "kostenpflichtig" : "fee"}`}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Sidewalk */}
+                  {(inspectResult.interpreted.sidewalk.left !== "no" ||
+                    inspectResult.interpreted.sidewalk.right !== "no") && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-medium">{lang === "de" ? "Gehweg" : "Sidewalk"}</span>
+                      {inspectResult.interpreted.sidewalk.left === inspectResult.interpreted.sidewalk.right ? (
+                        <span className="text-muted-foreground">
+                          {lang === "de" ? "beidseitig" : "both"} ({inspectResult.interpreted.sidewalk.left})
+                        </span>
+                      ) : (
+                        <>
+                          {inspectResult.interpreted.sidewalk.left !== "no" && (
+                            <span className="text-muted-foreground">
+                              {lang === "de" ? "links" : "left"}: {inspectResult.interpreted.sidewalk.left}
+                            </span>
+                          )}
+                          {inspectResult.interpreted.sidewalk.right !== "no" && (
+                            <span className="text-muted-foreground">
+                              {lang === "de" ? "rechts" : "right"}: {inspectResult.interpreted.sidewalk.right}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Raw tags toggle */}
+                  <button
+                    className="text-left text-muted-foreground hover:text-foreground underline"
+                    onClick={() => setTagsExpanded((v) => !v)}
+                  >
+                    {tagsExpanded
+                      ? t("inspectTagsHide")
+                      : `${t("inspectTags")} (${Object.keys(inspectResult.rawTags).length})`}
+                  </button>
+                  {tagsExpanded && (
+                    <div className="flex flex-col gap-0.5 max-h-40 overflow-y-auto">
+                      {Object.entries(inspectResult.rawTags).map(([k, v]) => (
+                        <div key={k} className="flex gap-1">
+                          <span className="text-muted-foreground shrink-0">{k}:</span>
+                          <span className="break-all">{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                </>
+              )}
+            </div>
+          )}
+
         </div>
       )}
 
@@ -514,6 +529,41 @@ export function ExploreTab({
           </a>
         </div>
       )}
+
+      {/* Bottom utility bar */}
+      <div className="flex gap-1 items-center pt-1 border-t border-border mt-auto">
+        <Button
+          size="sm"
+          className="h-8 text-xs flex-1"
+          onClick={() => mapMode === "inspect" && inspectResult ? handleGenerateFromInspect() : handleGenerate()}
+          disabled={generating || mapMode === "mark-section" || (mapMode === "inspect" ? !inspectResult : !mapReference)}
+        >
+          {generating ? "…" : t("generateSection")}
+        </Button>
+        <Button
+          variant="ghost" size="icon" className="h-8 w-8 shrink-0"
+          title={t("fitMap")}
+          onClick={onFitMap}
+          disabled={!mapReference}
+        >
+          <Maximize2 size={13} />
+        </Button>
+        <Button
+          variant="ghost" size="icon" className="h-8 w-8 shrink-0"
+          title={t("clearMap")}
+          onClick={() => {
+            onReferenceSet(null);
+            setSectionPoints([]);
+            measurePtsRef.current = [];
+            setInspectResult(null);
+            onSectionLineChange(undefined);
+            onMeasurePointsChange(undefined);
+            setMeasureDist(0);
+          }}
+        >
+          <Trash2 size={13} />
+        </Button>
+      </div>
     </div>
   );
 }

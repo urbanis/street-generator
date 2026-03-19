@@ -37,6 +37,7 @@ interface SidebarProps {
   mapVisible:            boolean;
   onToggleMap:           () => void;
   onShowMap:             () => void;
+  onFitMap:              () => void;
   showAllFigures:          boolean;
   onShowAllFiguresChange:  (v: boolean) => void;
   theme:                   SvgTheme;
@@ -51,7 +52,7 @@ export function Sidebar({
   onStreetGenerated, osmDisclaimer, onClearOsmDisclaimer,
   mapLayer, mapMode, onMapLayerChange, onMapModeChange,
   onSectionLineChange, onMeasurePointsChange, onRegisterMapClick, onOpenDocs,
-  mapVisible, onToggleMap, onShowMap,
+  mapVisible, onToggleMap, onShowMap, onFitMap,
   showAllFigures, onShowAllFiguresChange,
   theme, onThemeChange,
   templates, onTemplateApply,
@@ -90,6 +91,7 @@ export function Sidebar({
           mapVisible={mapVisible}
           onToggleMap={onToggleMap}
           onShowMap={onShowMap}
+          onFitMap={onFitMap}
         />
       </div>
       <div className={`${TAB_CONTENT} ${activeTab === "design" ? "" : "hidden"}`}>

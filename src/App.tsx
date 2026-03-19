@@ -199,6 +199,7 @@ export default function App() {
               mapVisible={mapVisible}
               onToggleMap={() => setMapVisible((v) => !v)}
               onShowMap={() => setMapVisible(true)}
+              onFitMap={() => { setMapVisible(true); setMapReference((r) => r ? { ...r } : r); }}
               showAllFigures={showAllFigures}
               onShowAllFiguresChange={setShowAllFigures}
               theme={theme}

@@ -1,7 +1,10 @@
-export const EXPLORE_TAB = "flex flex-col gap-2 p-3";
+export const EXPLORE_TAB = "flex flex-col gap-2 p-3 h-full";
 export const SEARCH_INPUT = "h-8 text-xs md:text-xs";
-export const TOOLBAR_ROW = "flex flex-wrap items-center gap-1";
 export const MODE_BUTTON_ACTIVE = "h-7 px-2 text-xs bg-primary text-primary-foreground rounded";
 export const MODE_BUTTON_INACTIVE = "h-7 px-2 text-xs text-muted-foreground border border-border rounded hover:border-primary";
 export const RESULT_ITEM = "flex items-start gap-2 rounded border border-border p-2 text-xs cursor-pointer hover:border-primary";
 export const ERROR_BOX = "rounded border border-red-200 bg-red-50 p-2 text-xs text-red-700";
+export const TOOL_CARD_BASE    = "flex items-start gap-3 w-full rounded border p-3 text-left transition-colors cursor-pointer";
+export const TOOL_CARD_ACTIVE  = `${TOOL_CARD_BASE} border-primary bg-primary/5`;
+export const TOOL_CARD_INACTIVE = `${TOOL_CARD_BASE} border-border hover:border-primary/50`;
+export const TOOL_ICON_WRAP    = "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded bg-muted text-muted-foreground";
