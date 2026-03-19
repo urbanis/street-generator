@@ -6,6 +6,7 @@ import { TopBar } from "./components/TopBar";
 import { Sidebar } from "./components/Sidebar";
 import type { Tab } from "./components/Sidebar";
 import { CrossSectionView } from "./components/CrossSectionView";
+import type { SvgTheme } from "./components/CrossSectionView";
 import { MapPanel } from "./components/MapPanel";
 import { TEMPLATES } from "./templates";
 import type { TemplateOption } from "./templates";
@@ -66,6 +67,7 @@ export default function App() {
   const [docsOpen,      setDocsOpen]      = useState(false);
   const [mapVisible,    setMapVisible]    = useState(false);
   const [showAllFigures, setShowAllFigures] = useState(true);
+  const [theme,         setTheme]          = useState<SvgTheme>("outline-label-measure");
   const [showWelcome, setShowWelcome] = useState<boolean>(
     () => !localStorage.getItem(TOUR_KEY)
   );
@@ -167,9 +169,8 @@ export default function App() {
             <CrossSectionView
               street={street}
               highlightedIds={highlightedIds}
-              templates={TEMPLATES}
-              onTemplateApply={handleTemplateApply}
               showAllFigures={showAllFigures}
+              theme={theme}
             />
           </div>
 
@@ -200,6 +201,10 @@ export default function App() {
               onShowMap={() => setMapVisible(true)}
               showAllFigures={showAllFigures}
               onShowAllFiguresChange={setShowAllFigures}
+              theme={theme}
+              onThemeChange={setTheme}
+              templates={TEMPLATES}
+              onTemplateApply={handleTemplateApply}
             />
           </div>
 

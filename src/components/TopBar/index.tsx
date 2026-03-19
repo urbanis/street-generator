@@ -2,10 +2,10 @@ import { useT } from "../../i18n";
 import type { Lang } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import { Button } from "@/components/ui/button";
-import { Share2, FileUp, Check, X } from "lucide-react";
+import { Share2, FileUp, Check, X, HelpCircle } from "lucide-react";
 import {
   TOP_BAR, BRAND_SECTION, BRAND_ICON, BRAND_TITLE, BRAND_VERSION,
-  TOOLBAR_SECTION, LANG_ACTIVE, LANG_INACTIVE,
+  TOOLBAR_SECTION, LANG_INACTIVE,
 } from "./styles";
 
 interface TopBarProps {
@@ -54,19 +54,16 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
         </div>
 
         <div className={TOOLBAR_SECTION}>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={handleImport}>
-            <FileUp size={12} />
-            <span className="hidden lg:inline">{t("importJson")}</span>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleImport} title={t("importJson")} aria-label={t("importJson")}>
+            <FileUp size={14} />
           </Button>
 
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1" onClick={onShare}>
-            {shareCopied ? <Check size={12} className="text-green-600" /> : <Share2 size={12} />}
-            <span className="hidden lg:inline">{shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : t("share")}</span>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onShare} title={shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : t("share")} aria-label={t("share")}>
+            {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
           </Button>
 
-          {/* Mobile: compact select */}
           <select
-            className="lg:hidden h-7 px-1 text-xs text-muted-foreground bg-background border-0 rounded cursor-pointer"
+            className="h-7 px-1.5 text-xs text-muted-foreground bg-background border border-border rounded cursor-pointer"
             value={lang}
             onChange={(e) => onLangChange(e.target.value as "de" | "en")}
             aria-label="Language"
@@ -74,18 +71,13 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
             <option value="de">DE</option>
             <option value="en">EN</option>
           </select>
-          {/* Desktop: button pair */}
-          <div className="hidden lg:flex items-center gap-0.5 ml-1">
-            <button className={lang === "de" ? LANG_ACTIVE : LANG_INACTIVE} onClick={() => onLangChange("de")}>DE</button>
-            <button className={lang === "en" ? LANG_ACTIVE : LANG_INACTIVE} onClick={() => onLangChange("en")}>EN</button>
-          </div>
           <button
             onClick={onReplayTour}
             className={LANG_INACTIVE}
             title={lang === "de" ? "Tour neu starten" : "Replay tour"}
             aria-label={lang === "de" ? "Tour neu starten" : "Replay tour"}
           >
-            ?
+            <HelpCircle size={14} />
           </button>
         </div>
       </div>

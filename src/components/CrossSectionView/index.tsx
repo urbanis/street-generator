@@ -4,10 +4,9 @@ import type { StreetConfig } from "../../models/street";
 import { getElementDef } from "../../elements/registry";
 import { computeLayout, BAND_H, ANN_H } from "./renderer";
 import { getFigureVariants } from "../../figures/registry";
-import type { TemplateOption } from "../../templates";
 import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./styles";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, Download } from "lucide-react";
 
 export type SvgTheme =
   | "full"
@@ -16,7 +15,7 @@ export type SvgTheme =
   | "outline-label-measure"
   | "outline-measure";
 
-const THEMES: { value: SvgTheme; label: { de: string; en: string } }[] = [
+export const THEMES: { value: SvgTheme; label: { de: string; en: string } }[] = [
   { value: "full",                  label: { de: "Vollständig",             en: "Full" } },
   { value: "color-labels",          label: { de: "Farbe + Labels",          en: "Color + labels" } },
   { value: "outline-label",         label: { de: "Umriss + Labels",         en: "Outline + labels" } },
@@ -42,14 +41,12 @@ const FLOOR_COLORS: Record<string, string> = {
 interface CrossSectionViewProps {
   street:           StreetConfig;
   highlightedIds:   string[];
-  templates:        TemplateOption[];
-  onTemplateApply:  (tpl: TemplateOption) => void;
   showAllFigures:   boolean;
+  theme:            SvgTheme;
 }
 
-export function CrossSectionView({ street, highlightedIds, templates, onTemplateApply, showAllFigures }: CrossSectionViewProps) {
+export function CrossSectionView({ street, highlightedIds, showAllFigures, theme }: CrossSectionViewProps) {
   const lang                                   = useLang();
-  const [theme, setTheme]                      = useState<SvgTheme>("outline-label-measure");
   const [zoom, setZoom]                        = useState(1);
   const svgRef                                 = useRef<SVGSVGElement>(null);
   const wrapRef                                = useRef<HTMLDivElement>(null);
@@ -188,56 +185,33 @@ export function CrossSectionView({ street, highlightedIds, templates, onTemplate
     <div className={CROSS_SECTION_VIEW}>
       <div className={CSV_HEADER}>
         <div className={CSV_CONTROLS}>
-          {/* Template select — hidden on mobile */}
-          <select
-            className="hidden lg:block h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground shrink-0"
-            defaultValue=""
-            onChange={(e) => {
-              const tpl = templates.find((t) => t.id === e.target.value);
-              if (tpl) onTemplateApply(tpl);
-              e.target.value = "";
-            }}
-          >
-            <option value="" disabled>{lang === "de" ? "Neue Straße" : "New street"}</option>
-            {templates.map((tpl) => (
-              <option key={tpl.id} value={tpl.id}>{tpl.label[lang]}</option>
-            ))}
-          </select>
-          {/* "Style" label — hidden on mobile */}
-          <span className="hidden lg:inline text-xs text-muted-foreground shrink-0">{lang === "de" ? "Stil" : "Style"}</span>
-          {/* Theme select — full on desktop, shrinks on mobile */}
-          <select
-            className="min-w-0 flex-1 lg:flex-none h-7 rounded border border-input bg-background px-1 text-xs text-foreground"
-            value={theme}
-            onChange={(e) => setTheme(e.target.value as SvgTheme)}
-          >
-            {THEMES.map((th) => (
-              <option key={th.value} value={th.value}>{th.label[lang]}</option>
-            ))}
-          </select>
           <div className="flex items-center gap-0.5 border border-border rounded shrink-0">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title="Zoom in"><ZoomIn size={12} /></Button>
             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title="Fit"><Maximize2 size={11} /></Button>
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title="Zoom out"><ZoomOut size={12} /></Button>
           </div>
-          {/* Export — icon-only on mobile, labelled on desktop */}
-          <select
-            className="shrink-0 h-7 w-8 lg:w-auto appearance-none rounded border border-input bg-background text-xs text-foreground text-center cursor-pointer lg:px-1.5"
-            defaultValue=""
-            data-tour="export-btn"
-            onChange={(e) => {
-              const fmt = e.target.value;
-              e.target.value = "";
-              if (fmt === "png") exportPng();
-              else if (fmt === "svg") exportSvg();
-              else if (fmt === "json") exportJson();
-            }}
-          >
-            <option value="" disabled>↓</option>
-            <option value="png">PNG</option>
-            <option value="svg">SVG</option>
-            <option value="json">JSON</option>
-          </select>
+          {/* Export — Download icon button with invisible select overlay for native picker */}
+          <div className="relative shrink-0 ml-auto" data-tour="export-btn" title={lang === "de" ? "Exportieren" : "Export"}>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 border border-input pointer-events-none" tabIndex={-1} aria-hidden>
+              <Download size={14} />
+            </Button>
+            <select
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              defaultValue=""
+              onChange={(e) => {
+                const fmt = e.target.value;
+                e.target.value = "";
+                if (fmt === "png") exportPng();
+                else if (fmt === "svg") exportSvg();
+                else if (fmt === "json") exportJson();
+              }}
+            >
+              <option value="" disabled>{lang === "de" ? "Exportieren" : "Export"}</option>
+              <option value="png">PNG</option>
+              <option value="svg">SVG</option>
+              <option value="json">JSON</option>
+            </select>
+          </div>
         </div>
       </div>
 

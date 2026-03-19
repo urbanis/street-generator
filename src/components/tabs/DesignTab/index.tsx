@@ -10,6 +10,9 @@ import { DESIGN_TAB, DISCLAIMER, ELEMENT_LIST, EMPTY_STATE } from "./styles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { THEMES } from "../../CrossSectionView";
+import type { SvgTheme } from "../../CrossSectionView";
+import type { TemplateOption } from "../../../templates";
 
 interface DesignTabProps {
   street: StreetConfig;
@@ -19,6 +22,10 @@ interface DesignTabProps {
   onClearOsmDisclaimer: () => void;
   showAllFigures:          boolean;
   onShowAllFiguresChange:  (v: boolean) => void;
+  theme:                   SvgTheme;
+  onThemeChange:           (t: SvgTheme) => void;
+  templates:               TemplateOption[];
+  onTemplateApply:         (tpl: TemplateOption) => void;
 }
 
 function sortBuildingsToEdges(elements: StreetElement[]): StreetElement[] {
@@ -28,7 +35,7 @@ function sortBuildingsToEdges(elements: StreetElement[]): StreetElement[] {
   return [...left, ...middle, ...right];
 }
 
-export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer, showAllFigures, onShowAllFiguresChange }: DesignTabProps) {
+export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, templates, onTemplateApply }: DesignTabProps) {
   const t    = useT();
   const lang = useLang();
   const [dragIndex, setDragIndex]       = useState<number | null>(null);
@@ -115,12 +122,43 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
         />
       </div>
 
+      <div className="flex flex-col gap-1 border-b border-border pb-2">
+        <Label className="text-xs text-muted-foreground">{lang === "de" ? "Vorlage" : "Template"}</Label>
+        <select
+          className="h-7 w-full rounded border border-input bg-background px-1.5 text-xs text-foreground"
+          defaultValue=""
+          onChange={(e) => {
+            const tpl = templates.find((t) => t.id === e.target.value);
+            if (tpl) onTemplateApply(tpl);
+            e.target.value = "";
+          }}
+        >
+          <option value="" disabled>{lang === "de" ? "Vorlage auswählen…" : "Select a template…"}</option>
+          {templates.filter((tpl) => tpl.id !== "empty").map((tpl) => (
+            <option key={tpl.id} value={tpl.id}>{tpl.label[lang]}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="border-b border-border pb-2">
         <p className="text-xs text-muted-foreground mb-1.5">{t("addElement")}</p>
         <ElementPalette
           onAdd={addElement}
           existingTypes={street.elements.map((e) => e.type)}
         />
+      </div>
+
+      <div className="flex items-center justify-between border-b border-border pb-2">
+        <span className="text-xs text-muted-foreground">{lang === "de" ? "Stil" : "Style"}</span>
+        <select
+          className="h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground"
+          value={theme}
+          onChange={(e) => onThemeChange(e.target.value as SvgTheme)}
+        >
+          {THEMES.map((th) => (
+            <option key={th.value} value={th.value}>{th.label[lang]}</option>
+          ))}
+        </select>
       </div>
 
       <div className="flex items-center justify-between border-b border-border pb-2">

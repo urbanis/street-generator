@@ -4,6 +4,8 @@ import type { ValidationResultItem } from "../../rules/types";
 import type { MapReference } from "../../models/map";
 import type { MapLayer, MapMode } from "../../models/explore";
 import { ExploreTab } from "../tabs/ExploreTab";
+import type { SvgTheme } from "../CrossSectionView";
+import type { TemplateOption } from "../../templates";
 import { DesignTab } from "../tabs/DesignTab";
 import { EvaluateTab } from "../tabs/EvaluateTab";
 import {
@@ -37,6 +39,10 @@ interface SidebarProps {
   onShowMap:             () => void;
   showAllFigures:          boolean;
   onShowAllFiguresChange:  (v: boolean) => void;
+  theme:                   SvgTheme;
+  onThemeChange:           (t: SvgTheme) => void;
+  templates:               TemplateOption[];
+  onTemplateApply:         (tpl: TemplateOption) => void;
 }
 
 export function Sidebar({
@@ -47,6 +53,8 @@ export function Sidebar({
   onSectionLineChange, onMeasurePointsChange, onRegisterMapClick, onOpenDocs,
   mapVisible, onToggleMap, onShowMap,
   showAllFigures, onShowAllFiguresChange,
+  theme, onThemeChange,
+  templates, onTemplateApply,
 }: SidebarProps) {
   const t = useT();
 
@@ -93,6 +101,10 @@ export function Sidebar({
           onClearOsmDisclaimer={onClearOsmDisclaimer}
           showAllFigures={showAllFigures}
           onShowAllFiguresChange={onShowAllFiguresChange}
+          theme={theme}
+          onThemeChange={onThemeChange}
+          templates={templates}
+          onTemplateApply={onTemplateApply}
         />
       </div>
       <div className={`${TAB_CONTENT} ${activeTab === "evaluate" ? "" : "hidden"}`}>
