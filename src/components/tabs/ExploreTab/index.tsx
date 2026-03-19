@@ -261,29 +261,41 @@ export function ExploreTab({
         </Button>
       </div>
 
-      {/* Layer toggle + map visibility */}
-      <span className="text-xs text-muted-foreground">{t("basemapsLabel")}</span>
-      <div className="flex gap-1 items-center">
-        <button
-          className={mapLayer === "osm" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
-          onClick={() => { onShowMap(); onMapLayerChange("osm"); }}
-        >
-          {t("mapStreet")}
-        </button>
-        <button
-          className={mapLayer === "satellite" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
-          onClick={() => { onShowMap(); onMapLayerChange("satellite"); }}
-        >
-          {t("mapSatellite")}
-        </button>
+      {/* Map visibility + basemaps */}
+      {!mapVisible ? (
         <Button
-          variant="ghost" size="icon" className="h-7 w-7 ml-auto shrink-0"
-          title={mapVisible ? (lang === "de" ? "Karte ausblenden" : "Hide map") : (lang === "de" ? "Karte einblenden" : "Show map")}
+          variant="outline"
+          size="sm"
+          className="w-full h-9 gap-2 text-xs"
           onClick={onToggleMap}
         >
-          {mapVisible ? <EyeOff size={13} /> : <Eye size={13} />}
+          <Eye size={14} />
+          {lang === "de" ? "Karte anzeigen" : "Show map"}
         </Button>
-      </div>
+      ) : (
+        <div className="flex gap-1 items-center">
+          <button
+            className={mapLayer === "osm" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
+            onClick={() => { onShowMap(); onMapLayerChange("osm"); }}
+          >
+            {t("mapStreet")}
+          </button>
+          <button
+            className={mapLayer === "satellite" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
+            onClick={() => { onShowMap(); onMapLayerChange("satellite"); }}
+          >
+            {t("mapSatellite")}
+          </button>
+          <Button
+            variant="ghost" size="sm"
+            className="h-7 px-2 text-xs gap-1 ml-auto shrink-0 text-muted-foreground"
+            onClick={onToggleMap}
+          >
+            <EyeOff size={13} />
+            {lang === "de" ? "Ausblenden" : "Hide"}
+          </Button>
+        </div>
+      )}
 
       {/* Mode + utility toolbar */}
       <span className="text-xs text-muted-foreground">{t("toolsLabel")}</span>
