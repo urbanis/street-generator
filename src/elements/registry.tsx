@@ -74,7 +74,7 @@ const REGISTRY: ElementDef[] = [
   },
   {
     type: "TRAFFIC_LANE",
-    label: { de: "Fahrspur", en: "Traffic lane" },
+    label: { de: "Fahrstreifen", en: "Traffic lane" },
     defaultWidth_m: 3.25,
     defaultStyle: { fill: "#d1d5db", stroke: "#6b7280" },
     icon: Car,
@@ -107,7 +107,7 @@ const REGISTRY: ElementDef[] = [
   },
   {
     type: "PLANTING_STRIP",
-    label: { de: "Pflanzstreifen", en: "Planting strip" },
+    label: { de: "Grünstreifen", en: "Planting strip" },
     defaultWidth_m: 1.5,
     defaultStyle: { fill: "#86efac", stroke: "#15803d" },
     icon: Flower2,

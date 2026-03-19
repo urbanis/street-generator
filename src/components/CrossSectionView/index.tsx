@@ -6,7 +6,7 @@ import { computeLayout, BAND_H, ANN_H } from "./renderer";
 import { getFigureVariants } from "../../figures/registry";
 import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./styles";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize2, Download } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, Download, FileUp, Share2, Check } from "lucide-react";
 
 export type SvgTheme =
   | "full"
@@ -43,13 +43,18 @@ interface CrossSectionViewProps {
   highlightedIds:   string[];
   showAllFigures:   boolean;
   theme:            SvgTheme;
+  onStreetImport:   (street: StreetConfig) => void;
+  onShare:          () => void;
+  shareCopied:      boolean;
 }
 
-export function CrossSectionView({ street, highlightedIds, showAllFigures, theme }: CrossSectionViewProps) {
+export function CrossSectionView({ street, highlightedIds, showAllFigures, theme, onStreetImport, onShare, shareCopied }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const [zoom, setZoom]                        = useState(1);
+  const [isPanning, setIsPanning]              = useState(false);
   const svgRef                                 = useRef<SVGSVGElement>(null);
   const wrapRef                                = useRef<HTMLDivElement>(null);
+  const panStartRef                            = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null);
   const { showColor, showNames, showMeasure }  = useThemeFlags(theme);
 
   const layout   = computeLayout(street);
@@ -59,6 +64,43 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
   const SVG_H    = GROUND_Y + BAND_H + ANN_H;
 
   useEffect(() => { fit(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleImport() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const s = JSON.parse(reader.result as string) as StreetConfig;
+          onStreetImport(s);
+        } catch { alert("Invalid JSON file"); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  function handlePanStart(e: React.MouseEvent<HTMLDivElement>) {
+    if (!wrapRef.current) return;
+    panStartRef.current = { x: e.clientX, y: e.clientY, scrollLeft: wrapRef.current.scrollLeft, scrollTop: wrapRef.current.scrollTop };
+    setIsPanning(true);
+    e.preventDefault();
+  }
+
+  function handlePanMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (!panStartRef.current || !wrapRef.current) return;
+    wrapRef.current.scrollLeft = panStartRef.current.scrollLeft - (e.clientX - panStartRef.current.x);
+    wrapRef.current.scrollTop  = panStartRef.current.scrollTop  - (e.clientY - panStartRef.current.y);
+  }
+
+  function handlePanEnd() {
+    setIsPanning(false);
+    panStartRef.current = null;
+  }
 
   function fit() {
     if (!wrapRef.current || W === 0) return;
@@ -190,6 +232,12 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title="Fit"><Maximize2 size={11} /></Button>
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title="Zoom out"><ZoomOut size={12} /></Button>
           </div>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={handleImport} title={lang === "de" ? "JSON importieren" : "Import JSON"} aria-label={lang === "de" ? "JSON importieren" : "Import JSON"}>
+            <FileUp size={14} />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : (lang === "de" ? "Teilen" : "Share")} aria-label={lang === "de" ? "Teilen" : "Share"}>
+            {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
+          </Button>
           {/* Export — Download icon button with invisible select overlay for native picker */}
           <div className="relative shrink-0 ml-auto" data-tour="export-btn" title={lang === "de" ? "Exportieren" : "Export"}>
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0 border border-input pointer-events-none" tabIndex={-1} aria-hidden>
@@ -215,7 +263,16 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
         </div>
       </div>
 
-      <div ref={wrapRef} className={CSV_SVG_WRAP} data-tour="cross-section">
+      <div
+        ref={wrapRef}
+        className={CSV_SVG_WRAP}
+        data-tour="cross-section"
+        style={{ cursor: isPanning ? "grabbing" : "grab" }}
+        onMouseDown={handlePanStart}
+        onMouseMove={handlePanMove}
+        onMouseUp={handlePanEnd}
+        onMouseLeave={handlePanEnd}
+      >
         {W === 0 ? (
           <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
             {lang === "de" ? "Keine Elemente. Palette unten verwenden." : "No elements. Use the palette below."}

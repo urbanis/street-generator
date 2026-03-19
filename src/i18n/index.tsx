@@ -4,7 +4,7 @@ export type Lang = "de" | "en";
 
 const TRANSLATIONS = {
   de: {
-    appTitle: "Strasselab",
+    appTitle: "StraßenLabor",
     version: "v0.1",
     // Tabs
     tabExplore: "Erkunden",
@@ -20,10 +20,10 @@ const TRANSLATIONS = {
     CYCLE_LANE: "Radweg",
     BUFFER: "Puffer",
     PARKING_LANE: "Parkstreifen",
-    TRAFFIC_LANE: "Fahrspur",
+    TRAFFIC_LANE: "Fahrstreifen",
     BUS_LANE: "Busspur",
     MEDIAN: "Mittelstreifen",
-    PLANTING_STRIP: "Pflanzstreifen",
+    PLANTING_STRIP: "Grünstreifen",
     BUILDING_LEFT:     "Gebäude links",
     BUILDING_RIGHT:    "Gebäude rechts",
     floorUseWohnen:    "Wohnen",
@@ -76,12 +76,12 @@ const TRANSLATIONS = {
     // Rules
     R01: "Gehweg ≥ 2,5 m",
     R02: "Radweg ≥ 1,85 m",
-    R03: "Fahrspur 2,75–3,75 m",
+    R03: "Fahrstreifen 2,75–3,75 m",
     R04: "Parkstreifen 2,0–2,5 m",
     R05: "Busspur ≥ 3,0 m",
     R06: "Puffer zwischen Rad und Parken/Verkehr ≥ 0,75 m",
     R07: "Mittelstreifen ≥ 1,0 m",
-    R08: "Pflanzstreifen ≥ 1,5 m",
+    R08: "Grünstreifen ≥ 1,5 m",
     R09: "Fahrbahn gesamt ≤ 13,0 m",
     R10: "Straße gesamt ≤ 30,0 m",
     // Misc
@@ -95,7 +95,7 @@ const TRANSLATIONS = {
     figures:             "Figuren",
   },
   en: {
-    appTitle: "Strasselab",
+    appTitle: "StraßenLabor",
     version: "v0.1",
     tabExplore: "Explore",
     tabDesign: "Design",

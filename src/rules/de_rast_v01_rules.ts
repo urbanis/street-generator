@@ -36,7 +36,7 @@ export function runRastRules(street: StreetConfig): ValidationResultItem[] {
     results.push({
       rule_id: "R03",
       status: ok ? "PASS" : "FAIL",
-      message_de: `Fahrspur ${t.width_m.toFixed(2)} m (2,75–3,75 m erforderlich)`,
+      message_de: `Fahrstreifen ${t.width_m.toFixed(2)} m (2,75–3,75 m erforderlich)`,
       message_en: `Traffic lane ${t.width_m.toFixed(2)} m (2.75–3.75 m required)`,
       affected_element_ids: [t.id],
     });
@@ -78,7 +78,7 @@ export function runRastRules(street: StreetConfig): ValidationResultItem[] {
       results.push({
         rule_id: "R06",
         status: "WARN",
-        message_de: "Puffer zwischen Rad- und Parkstreifen/Fahrspur fehlt",
+        message_de: "Puffer zwischen Rad- und Parkstreifen/Fahrstreifen fehlt",
         message_en: "Buffer between cycle lane and parking/traffic lane missing",
         affected_element_ids: [a.id, b.id],
       });
@@ -115,7 +115,7 @@ export function runRastRules(street: StreetConfig): ValidationResultItem[] {
     results.push({
       rule_id: "R08",
       status: p.width_m >= 1.5 ? "PASS" : "FAIL",
-      message_de: `Pflanzstreifen ${p.width_m.toFixed(2)} m (≥ 1,5 m erforderlich)`,
+      message_de: `Grünstreifen ${p.width_m.toFixed(2)} m (≥ 1,5 m erforderlich)`,
       message_en: `Planting strip ${p.width_m.toFixed(2)} m (≥ 1.5 m required)`,
       affected_element_ids: [p.id],
     });

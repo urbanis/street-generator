@@ -393,7 +393,7 @@ export function ExploreTab({
 
                   {/* Lanes */}
                   <div className="flex flex-col gap-0.5">
-                    <span className="font-medium">{lang === "de" ? "Fahrspuren" : "Lanes"}</span>
+                    <span className="font-medium">{lang === "de" ? "Fahrstreifen" : "Lanes"}</span>
                     <span className="text-muted-foreground">
                       {inspectResult.interpreted.lanes.total}
                       {inspectResult.interpreted.lanes.oneway && (

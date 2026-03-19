@@ -171,6 +171,9 @@ export default function App() {
               highlightedIds={highlightedIds}
               showAllFigures={showAllFigures}
               theme={theme}
+              onStreetImport={(s) => setStreet(withDefaultFigures(s))}
+              onShare={handleShare}
+              shareCopied={shareCopied}
             />
           </div>
 
