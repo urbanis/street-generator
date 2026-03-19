@@ -276,13 +276,13 @@ export function ExploreTab({
         <div className="flex gap-1 items-center">
           <button
             className={mapLayer === "osm" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
-            onClick={() => { onShowMap(); onMapLayerChange("osm"); }}
+            onClick={() => onMapLayerChange("osm")}
           >
             {t("mapStreet")}
           </button>
           <button
             className={mapLayer === "satellite" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
-            onClick={() => { onShowMap(); onMapLayerChange("satellite"); }}
+            onClick={() => onMapLayerChange("satellite")}
           >
             {t("mapSatellite")}
           </button>
