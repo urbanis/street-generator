@@ -107,6 +107,11 @@ export default function App() {
     setOsmDisclaimer(true);
   }
 
+  function handleAiGenerate(generated: StreetConfig) {
+    setStreet(withDefaultFigures(generated));
+    setActiveTab("design");
+  }
+
   function handleTemplateApply(tpl: TemplateOption) {
     setStreet(cloneTemplate(tpl.config));
   }
@@ -177,6 +182,7 @@ export default function App() {
               onShare={handleShare}
               shareCopied={shareCopied}
               onClear={handleClear}
+              onAiGenerate={handleAiGenerate}
             />
           </div>
 

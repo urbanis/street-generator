@@ -7,7 +7,8 @@ import { getFigureVariants } from "../../figures/registry";
 import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./styles";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2, Palette, Type, Ruler, PersonStanding } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2, Palette, Type, Ruler, PersonStanding, Sparkles } from "lucide-react";
+import { AIModal } from "../AIModal";
 
 export interface ThemeFlags {
   showColor:   boolean;
@@ -57,12 +58,14 @@ interface CrossSectionViewProps {
   onShare:          () => void;
   shareCopied:      boolean;
   onClear:          () => void;
+  onAiGenerate:     (generated: StreetConfig) => void;
 }
 
-export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear }: CrossSectionViewProps) {
+export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear, onAiGenerate }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const [zoom, setZoom]                        = useState(1);
   const [isPanning, setIsPanning]              = useState(false);
+  const [aiModalOpen, setAiModalOpen]          = useState(false);
   const svgRef                                 = useRef<SVGSVGElement>(null);
   const wrapRef                                = useRef<HTMLDivElement>(null);
   const panStartRef                            = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null);
@@ -296,6 +299,18 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
               <PersonStanding size={12} />
             </Button>
           </div>
+
+          {/* AI generate — standalone action button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 shrink-0"
+            onClick={() => setAiModalOpen(true)}
+            title={lang === "de" ? "Straße generieren" : "Generate street"}
+            aria-label={lang === "de" ? "Straße generieren" : "Generate street"}
+          >
+            <Sparkles size={12} />
+          </Button>
 
           {/* Left spacer — pushes zoom to center */}
           <div className="flex-1" />
@@ -550,6 +565,13 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
           </svg>
         )}
       </div>
+      {aiModalOpen && (
+        <AIModal
+          lang={lang}
+          onGenerate={(s) => { onAiGenerate(s); setAiModalOpen(false); }}
+          onClose={() => setAiModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
