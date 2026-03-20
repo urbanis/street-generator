@@ -6,7 +6,8 @@ import { TopBar } from "./components/TopBar";
 import { Sidebar } from "./components/Sidebar";
 import type { Tab } from "./components/Sidebar";
 import { CrossSectionView } from "./components/CrossSectionView";
-import type { SvgTheme } from "./components/CrossSectionView";
+import type { ThemeFlags } from "./components/CrossSectionView";
+import { DEFAULT_THEME_FLAGS } from "./components/CrossSectionView";
 import { MapPanel } from "./components/MapPanel";
 import { TEMPLATES } from "./templates";
 import type { TemplateOption } from "./templates";
@@ -67,7 +68,7 @@ export default function App() {
   const [docsOpen,      setDocsOpen]      = useState(false);
   const [mapVisible,    setMapVisible]    = useState(false);
   const [showAllFigures, setShowAllFigures] = useState(true);
-  const [theme,         setTheme]          = useState<SvgTheme>("outline-label-measure");
+  const [theme,         setTheme]          = useState<ThemeFlags>(DEFAULT_THEME_FLAGS);
   const [showWelcome, setShowWelcome] = useState<boolean>(
     () => !localStorage.getItem(TOUR_KEY)
   );
@@ -170,7 +171,9 @@ export default function App() {
               street={street}
               highlightedIds={highlightedIds}
               showAllFigures={showAllFigures}
+              onShowAllFiguresChange={setShowAllFigures}
               theme={theme}
+              onThemeChange={setTheme}
               onStreetImport={(s) => setStreet(withDefaultFigures(s))}
               onShare={handleShare}
               shareCopied={shareCopied}
@@ -204,10 +207,6 @@ export default function App() {
               onToggleMap={() => setMapVisible((v) => !v)}
               onShowMap={() => setMapVisible(true)}
               onFitMap={() => { setMapVisible(true); setMapReference((r) => r ? { ...r } : r); }}
-              showAllFigures={showAllFigures}
-              onShowAllFiguresChange={setShowAllFigures}
-              theme={theme}
-              onThemeChange={setTheme}
               templates={TEMPLATES}
               onTemplateApply={handleTemplateApply}
             />

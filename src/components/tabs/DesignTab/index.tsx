@@ -10,8 +10,6 @@ import { DESIGN_TAB, DISCLAIMER, ELEMENT_LIST, EMPTY_STATE } from "./styles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { THEMES } from "../../CrossSectionView";
-import type { SvgTheme } from "../../CrossSectionView";
 import type { TemplateOption } from "../../../templates";
 
 interface DesignTabProps {
@@ -20,10 +18,6 @@ interface DesignTabProps {
   highlightedIds: string[];
   osmDisclaimer: boolean;
   onClearOsmDisclaimer: () => void;
-  showAllFigures:          boolean;
-  onShowAllFiguresChange:  (v: boolean) => void;
-  theme:                   SvgTheme;
-  onThemeChange:           (t: SvgTheme) => void;
   templates:               TemplateOption[];
   onTemplateApply:         (tpl: TemplateOption) => void;
 }
@@ -35,7 +29,7 @@ function sortBuildingsToEdges(elements: StreetElement[]): StreetElement[] {
   return [...left, ...middle, ...right];
 }
 
-export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, templates, onTemplateApply }: DesignTabProps) {
+export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaimer, onClearOsmDisclaimer, templates, onTemplateApply }: DesignTabProps) {
   const t    = useT();
   const lang = useLang();
   const [dragIndex, setDragIndex]       = useState<number | null>(null);
@@ -152,39 +146,6 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
           onAdd={addElement}
           existingTypes={street.elements.map((e) => e.type)}
         />
-      </div>
-
-      <div className="flex items-center justify-between border-b border-border pb-2">
-        <span className="text-xs text-muted-foreground">{lang === "de" ? "Stil" : "Style"}</span>
-        <select
-          className="h-7 rounded border border-input bg-background px-1.5 text-xs text-foreground"
-          value={theme}
-          onChange={(e) => onThemeChange(e.target.value as SvgTheme)}
-        >
-          {THEMES.map((th) => (
-            <option key={th.value} value={th.value}>{th.label[lang]}</option>
-          ))}
-        </select>
-      </div>
-
-      <div className="flex items-center justify-between border-b border-border pb-2">
-        <span className="text-xs text-muted-foreground">
-          {t("figures")}
-        </span>
-        <button
-          role="switch"
-          aria-checked={showAllFigures}
-          onClick={() => onShowAllFiguresChange(!showAllFigures)}
-          className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none ${
-            showAllFigures ? "bg-primary" : "bg-input"
-          }`}
-        >
-          <span
-            className={`pointer-events-none inline-block h-3 w-3 rounded-full bg-background shadow-lg ring-0 transition-transform ${
-              showAllFigures ? "translate-x-4" : "translate-x-0"
-            }`}
-          />
-        </button>
       </div>
 
       {street.elements.length > 0 && (

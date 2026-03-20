@@ -5,31 +5,21 @@ import { getElementDef } from "../../elements/registry";
 import { computeLayout, BAND_H, ANN_H, ROAD_OFFSET_M } from "./renderer";
 import { getFigureVariants } from "../../figures/registry";
 import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./styles";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2 } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2, Palette, Type, Ruler, PersonStanding } from "lucide-react";
 
-export type SvgTheme =
-  | "full"
-  | "color-labels"
-  | "outline-label"
-  | "outline-label-measure"
-  | "outline-measure";
-
-export const THEMES: { value: SvgTheme; label: { de: string; en: string } }[] = [
-  { value: "full",                  label: { de: "Vollständig",             en: "Full" } },
-  { value: "color-labels",          label: { de: "Farbe + Labels",          en: "Color + labels" } },
-  { value: "outline-label",         label: { de: "Umriss + Labels",         en: "Outline + labels" } },
-  { value: "outline-label-measure", label: { de: "Umriss + Labels + Maße",  en: "Outline + labels + measurements" } },
-  { value: "outline-measure",       label: { de: "Umriss + Maße",           en: "Outline + measurements" } },
-];
-
-function useThemeFlags(theme: SvgTheme) {
-  return {
-    showColor:   theme === "full" || theme === "color-labels",
-    showNames:   theme === "full" || theme === "color-labels" || theme === "outline-label" || theme === "outline-label-measure",
-    showMeasure: theme === "full" || theme === "outline-label-measure" || theme === "outline-measure",
-  };
+export interface ThemeFlags {
+  showColor:   boolean;
+  showLabels:  boolean;
+  showMeasure: boolean;
 }
+
+export const DEFAULT_THEME_FLAGS: ThemeFlags = {
+  showColor:   false,
+  showLabels:  true,
+  showMeasure: true,
+};
 
 const FLOOR_COLORS: Record<string, string> = {
   Wohnen:     "#fef08a",
@@ -60,22 +50,24 @@ function wrapLabel(text: string, maxWidthPx: number, fontSize: number): string[]
 interface CrossSectionViewProps {
   street:           StreetConfig;
   highlightedIds:   string[];
-  showAllFigures:   boolean;
-  theme:            SvgTheme;
+  showAllFigures:         boolean;
+  onShowAllFiguresChange: (v: boolean) => void;
+  theme:                  ThemeFlags;
+  onThemeChange:          (flags: ThemeFlags) => void;
   onStreetImport:   (street: StreetConfig) => void;
   onShare:          () => void;
   shareCopied:      boolean;
   onClear:          () => void;
 }
 
-export function CrossSectionView({ street, highlightedIds, showAllFigures, theme, onStreetImport, onShare, shareCopied, onClear }: CrossSectionViewProps) {
+export function CrossSectionView({ street, highlightedIds, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const [zoom, setZoom]                        = useState(1);
   const [isPanning, setIsPanning]              = useState(false);
   const svgRef                                 = useRef<SVGSVGElement>(null);
   const wrapRef                                = useRef<HTMLDivElement>(null);
   const panStartRef                            = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null);
-  const { showColor, showNames, showMeasure }  = useThemeFlags(theme);
+  const { showColor, showLabels: showNames, showMeasure } = theme;
 
   const layout          = computeLayout(street);
   const W               = layout.totalWidthPx;
@@ -262,6 +254,50 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
             <Trash2 size={14} />
           </Button>
 
+          {/* Theme toggles — color / labels / measures */}
+          <div className="flex items-center gap-0.5 border border-border rounded shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn("h-7 w-7 p-0", theme.showColor && "bg-accent text-accent-foreground")}
+              onClick={() => onThemeChange({ ...theme, showColor: !theme.showColor })}
+              title={lang === "de" ? "Farbe" : "Color"}
+              aria-pressed={theme.showColor}
+            >
+              <Palette size={12} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn("h-7 w-7 p-0", theme.showLabels && "bg-accent text-accent-foreground")}
+              onClick={() => onThemeChange({ ...theme, showLabels: !theme.showLabels })}
+              title={lang === "de" ? "Labels" : "Labels"}
+              aria-pressed={theme.showLabels}
+            >
+              <Type size={12} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn("h-7 w-7 p-0", theme.showMeasure && "bg-accent text-accent-foreground")}
+              onClick={() => onThemeChange({ ...theme, showMeasure: !theme.showMeasure })}
+              title={lang === "de" ? "Maße" : "Measures"}
+              aria-pressed={theme.showMeasure}
+            >
+              <Ruler size={12} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn("h-7 w-7 p-0", showAllFigures && "bg-accent text-accent-foreground")}
+              onClick={() => onShowAllFiguresChange(!showAllFigures)}
+              title={lang === "de" ? "Figuren" : "Figures"}
+              aria-pressed={showAllFigures}
+            >
+              <PersonStanding size={12} />
+            </Button>
+          </div>
+
           {/* Left spacer — pushes zoom to center */}
           <div className="flex-1" />
 
@@ -442,11 +478,11 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
 
             {/* Annotation zone — engineering dimension lines */}
             {(() => {
-              const bandBottom = GROUND_Y + roadOffsetPx + BAND_H;
-              const TICK_H     = 14; // vertical tick height
-              const dimLineY   = bandBottom + TICK_H;
-              const labelY     = dimLineY + 12;
-              const totalLineY = dimLineY + 46;
+              const maxBandBottom = GROUND_Y + roadOffsetPx + BAND_H;
+              const TICK_H        = 14; // vertical tick height
+              const dimLineY      = maxBandBottom + TICK_H;
+              const labelY        = dimLineY + 12;
+              const totalLineY    = dimLineY + 46;
 
               const streetEls = layout.elements.filter((le) => {
                 const el = street.elements.find((e) => e.id === le.id)!;
@@ -461,19 +497,20 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
               return (
                 <>
                   {layout.elements.map((le) => {
-                    const el        = street.elements.find((e) => e.id === le.id)!;
+                    const el           = street.elements.find((e) => e.id === le.id)!;
                     if (el.type === "BUILDING_LEFT" || el.type === "BUILDING_RIGHT") return null;
-                    const def       = getElementDef(el.type);
-                    const cx        = le.x + le.widthPx / 2;
-                    const tooNarrow = le.widthPx < 20;
+                    const def          = getElementDef(el.type);
+                    const cx           = le.x + le.widthPx / 2;
+                    const tooNarrow    = le.widthPx < 20;
+                    const elBandBottom = GROUND_Y + (isRoadLevel(el.type) ? roadOffsetPx : 0) + BAND_H;
                     return (
                       <g key={`ann-${el.id}`}>
-                        {/* Left tick */}
-                        <line x1={le.x}              y1={bandBottom} x2={le.x}              y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
-                        {/* Right tick */}
-                        <line x1={le.x + le.widthPx} y1={bandBottom} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
-                        {/* Horizontal dimension line */}
-                        <line x1={le.x} y1={dimLineY} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                        {/* Dimension lines — only when measures are visible */}
+                        {showMeasure && (<>
+                          <line x1={le.x}              y1={elBandBottom} x2={le.x}              y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                          <line x1={le.x + le.widthPx} y1={elBandBottom} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                          <line x1={le.x} y1={dimLineY} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                        </>)}
                         {/* Measurement — above dim line */}
                         {!tooNarrow && showMeasure && (
                           <text x={cx} y={dimLineY - 3} textAnchor="middle" dominantBaseline="auto" fontSize={8} fill="#6b7280">

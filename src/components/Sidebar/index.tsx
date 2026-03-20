@@ -4,7 +4,6 @@ import type { ValidationResultItem } from "../../rules/types";
 import type { MapReference } from "../../models/map";
 import type { MapLayer, MapMode } from "../../models/explore";
 import { ExploreTab } from "../tabs/ExploreTab";
-import type { SvgTheme } from "../CrossSectionView";
 import type { TemplateOption } from "../../templates";
 import { DesignTab } from "../tabs/DesignTab";
 import { EvaluateTab } from "../tabs/EvaluateTab";
@@ -38,10 +37,6 @@ interface SidebarProps {
   onToggleMap:           () => void;
   onShowMap:             () => void;
   onFitMap:              () => void;
-  showAllFigures:          boolean;
-  onShowAllFiguresChange:  (v: boolean) => void;
-  theme:                   SvgTheme;
-  onThemeChange:           (t: SvgTheme) => void;
   templates:               TemplateOption[];
   onTemplateApply:         (tpl: TemplateOption) => void;
 }
@@ -53,8 +48,6 @@ export function Sidebar({
   mapLayer, mapMode, onMapLayerChange, onMapModeChange,
   onSectionLineChange, onMeasurePointsChange, onRegisterMapClick, onOpenDocs,
   mapVisible, onToggleMap, onShowMap, onFitMap,
-  showAllFigures, onShowAllFiguresChange,
-  theme, onThemeChange,
   templates, onTemplateApply,
 }: SidebarProps) {
   const t = useT();
@@ -101,10 +94,6 @@ export function Sidebar({
           highlightedIds={highlightedIds}
           osmDisclaimer={osmDisclaimer}
           onClearOsmDisclaimer={onClearOsmDisclaimer}
-          showAllFigures={showAllFigures}
-          onShowAllFiguresChange={onShowAllFiguresChange}
-          theme={theme}
-          onThemeChange={onThemeChange}
           templates={templates}
           onTemplateApply={onTemplateApply}
         />
