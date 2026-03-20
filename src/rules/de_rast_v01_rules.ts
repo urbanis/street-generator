@@ -18,7 +18,7 @@ export function runRastRules(street: StreetConfig): ValidationResultItem[] {
   }
 
   // R02: Cycle lane ≥ 1.85 m
-  const cycleLanes = els.filter((e) => e.type === "CYCLE_LANE");
+  const cycleLanes = els.filter((e) => e.type === "CYCLE_LANE" || e.type === "CYCLE_LANE_ROAD");
   for (const c of cycleLanes) {
     results.push({
       rule_id: "R02",
@@ -72,8 +72,8 @@ export function runRastRules(street: StreetConfig): ValidationResultItem[] {
     const a = els[i];
     const b = els[i + 1];
     const cycleNext =
-      (a.type === "CYCLE_LANE" && (b.type === "PARKING_LANE" || b.type === "TRAFFIC_LANE")) ||
-      ((a.type === "PARKING_LANE" || a.type === "TRAFFIC_LANE") && b.type === "CYCLE_LANE");
+      ((a.type === "CYCLE_LANE" || a.type === "CYCLE_LANE_ROAD") && (b.type === "PARKING_LANE" || b.type === "TRAFFIC_LANE")) ||
+      ((a.type === "PARKING_LANE" || a.type === "TRAFFIC_LANE") && (b.type === "CYCLE_LANE" || b.type === "CYCLE_LANE_ROAD"));
     if (cycleNext) {
       results.push({
         rule_id: "R06",

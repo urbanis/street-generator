@@ -67,13 +67,14 @@ const FIGURE_REGISTRY: Partial<Record<ElementType, FigureVariant[]>> = {
   ],
 
   // CYCLE_LANE: no SVG assets yet — variants will appear once files are added
+  // CYCLE_LANE_ROAD: no SVG assets yet — same cyclist SVG variants as CYCLE_LANE once added
 
   TRAFFIC_LANE: [
     {
       id: "car-front",
       label: { de: "PKW (Frontalansicht)", en: "Car (front view)" },
       renderSVG: ({ cx, groundY, scale: s }) => {
-        const h = 1.5 * s;
+        const h = 1.25 * s;
         const w = h * (238.5 / 207.35);
         return <image href={trafficAutoFrontUrl} x={cx - w / 2} y={groundY - h} width={w} height={h} />;
       },
@@ -82,7 +83,7 @@ const FIGURE_REGISTRY: Partial<Record<ElementType, FigureVariant[]>> = {
       id: "car-back",
       label: { de: "PKW (Rückansicht)", en: "Car (back view)" },
       renderSVG: ({ cx, groundY, scale: s }) => {
-        const h = 1.5 * s;
+        const h = 1.25 * s;
         const w = h * (243.15 / 207.35);
         return <image href={trafficAutoBackUrl} x={cx - w / 2} y={groundY - h} width={w} height={h} />;
       },
@@ -95,7 +96,7 @@ const FIGURE_REGISTRY: Partial<Record<ElementType, FigureVariant[]>> = {
       label: { de: "PKW (Seitenansicht)", en: "Car (side view)" },
       renderSVG: ({ cx, groundY, widthPx, scale: s }) => {
         const carW = Math.min(4.5 * s, widthPx * 0.8);
-        const h    = carW * (207.35 / 546.01);
+        const h    = Math.min(carW * (207.35 / 546.01), 1.25 * s);
         return <image href={parkingLeftUrl} x={cx - carW / 2} y={groundY - h} width={carW} height={h} />;
       },
     },
@@ -107,7 +108,7 @@ const FIGURE_REGISTRY: Partial<Record<ElementType, FigureVariant[]>> = {
     {
       id: "tree-detailed",
       label: { de: "Detaillierter Baum", en: "Detailed tree" },
-      renderSVG: ({ cx, groundY, scale: s, height_m = 8 }) => {
+      renderSVG: ({ cx, groundY, scale: s, height_m = 6 }) => {
         const h = height_m * s;
         const w = h * (600.63 / 580.67);
         return <image href={treeDetailedUrl} x={cx - w / 2} y={groundY - h} width={w} height={h} />;
@@ -119,7 +120,7 @@ const FIGURE_REGISTRY: Partial<Record<ElementType, FigureVariant[]>> = {
     {
       id: "tree-detailed",
       label: { de: "Detaillierter Baum", en: "Detailed tree" },
-      renderSVG: ({ cx, groundY, scale: s, height_m = 8 }) => {
+      renderSVG: ({ cx, groundY, scale: s, height_m = 6 }) => {
         const h = height_m * s;
         const w = h * (600.63 / 580.67);
         return <image href={treeDetailedUrl} x={cx - w / 2} y={groundY - h} width={w} height={h} />;

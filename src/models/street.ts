@@ -1,6 +1,7 @@
 export type ElementType =
   | "SIDEWALK"
   | "CYCLE_LANE"
+  | "CYCLE_LANE_ROAD"
   | "BUFFER"
   | "PARKING_LANE"
   | "TRAFFIC_LANE"

@@ -18,6 +18,7 @@ const TRANSLATIONS = {
     // Element types
     SIDEWALK: "Gehweg",
     CYCLE_LANE: "Radweg",
+    CYCLE_LANE_ROAD: "Radfahrstreifen",
     BUFFER: "Puffer",
     PARKING_LANE: "Parkstreifen",
     TRAFFIC_LANE: "Fahrstreifen",
@@ -106,6 +107,7 @@ const TRANSLATIONS = {
     share: "Share",
     SIDEWALK: "Sidewalk",
     CYCLE_LANE: "Cycle lane",
+    CYCLE_LANE_ROAD: "Cycle lane (road)",
     BUFFER: "Buffer",
     PARKING_LANE: "Parking lane",
     TRAFFIC_LANE: "Traffic lane",

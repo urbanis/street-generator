@@ -23,6 +23,15 @@ All files go in `src/assets/figures/`. Once added, register each variant in `src
 
 ---
 
+## CYCLE_LANE_ROAD (2 missing — element has no figures until these are added)
+
+| File | Variant ID | Label DE / EN | Notes |
+|------|-----------|---------------|-------|
+| `cycle-lane-upright.svg` | `cyclist-upright` | Stadtrad (aufrecht) / City bike (upright) | Same file as CYCLE_LANE |
+| `cycle-lane-racing.svg` | `cyclist-racing` | Rennrad (vorgebeugt) / Racing bike (leaning) | Same file as CYCLE_LANE |
+
+---
+
 ## TRAFFIC_LANE (2 missing)
 
 | File | Variant ID | Label DE / EN | Notes |
@@ -72,9 +81,12 @@ All files go in `src/assets/figures/`. Once added, register each variant in `src
 
 | Total missing | Unique files |
 |---------------|-------------|
-| 15 variants | 13 SVG files (`tree-deciduous.svg` and `tree-conifer.svg` shared between PLANTING_STRIP and MEDIAN) |
+| 17 variants | 13 SVG files (`tree-deciduous.svg` and `tree-conifer.svg` shared between PLANTING_STRIP and MEDIAN; `cycle-lane-upright.svg` and `cycle-lane-racing.svg` shared between CYCLE_LANE and CYCLE_LANE_ROAD) |
+
+Note: CYCLE_LANE_ROAD shares the same 2 SVG files with CYCLE_LANE — adding those files unblocks figures for both element types simultaneously.
 
 ## Elements with no figures until SVGs are added
 
 - **CYCLE_LANE** — figure toggle hidden until `cycle-lane-upright.svg` is added
+- **CYCLE_LANE_ROAD** — figure toggle hidden until `cycle-lane-upright.svg` is added (same files as CYCLE_LANE)
 - **BUS_LANE** — figure toggle hidden until `bus-lane.svg` is added

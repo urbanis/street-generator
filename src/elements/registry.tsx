@@ -36,6 +36,17 @@ const REGISTRY: ElementDef[] = [
     ),
   },
   {
+    type: "CYCLE_LANE_ROAD",
+    label: { de: "Radfahrstreifen", en: "Cycle lane (road)" },
+    defaultWidth_m: 1.5,
+    defaultStyle: { fill: "#bbf7d0", stroke: "#16a34a" },
+    icon: Bike,
+    renderSVG: ({ x, widthPx, heightPx, style }) => (
+      <rect x={x} y={0} width={widthPx} height={heightPx}
+        fill={style.fill} stroke={style.stroke} strokeWidth={1} />
+    ),
+  },
+  {
     type: "BUFFER",
     label: { de: "Puffer", en: "Buffer" },
     defaultWidth_m: 0.75,
@@ -64,7 +75,7 @@ const REGISTRY: ElementDef[] = [
   {
     type: "PARKING_LANE",
     label: { de: "Parkstreifen", en: "Parking lane" },
-    defaultWidth_m: 2.0,
+    defaultWidth_m: 2.5,
     defaultStyle: { fill: "#e0e7ff", stroke: "#6366f1" },
     icon: ParkingSquare,
     renderSVG: ({ x, widthPx, heightPx, style }) => (

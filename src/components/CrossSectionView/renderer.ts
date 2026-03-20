@@ -14,9 +14,10 @@ export interface RenderLayout {
   skyH:         number; // height of sky zone in px
 }
 
-export const BAND_H  = 16; // ground band height px (~0.20 m visual)
-export const SKY_MIN = 40; // minimum sky zone height px
-export const ANN_H   = 80; // annotation zone height px
+export const BAND_H         = 16;   // ground band height px
+export const ROAD_OFFSET_M  = 0.20; // carriageway sits 0.20 m below sidewalk
+export const SKY_MIN        = 40;   // minimum sky zone height px
+export const ANN_H          = 80;   // annotation zone height px
 
 const MIN_SCALE        = 20;
 const MAX_CANVAS_WIDTH = 900;

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLang } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import { getElementDef } from "../../elements/registry";
-import { computeLayout, BAND_H, ANN_H } from "./renderer";
+import { computeLayout, BAND_H, ANN_H, ROAD_OFFSET_M } from "./renderer";
 import { getFigureVariants } from "../../figures/registry";
 import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./styles";
 import { Button } from "@/components/ui/button";
@@ -32,10 +32,10 @@ function useThemeFlags(theme: SvgTheme) {
 }
 
 const FLOOR_COLORS: Record<string, string> = {
-  Wohnen:     "#bfdbfe",
-  Gewerbe:    "#fde68a",
-  Gemischt:   "#c4b5fd",
-  Öffentlich: "#bbf7d0",
+  Wohnen:     "#fef08a",
+  Gewerbe:    "#fca5a5",
+  Gemischt:   "#fdba74",
+  Öffentlich: "#d1d5db",
 };
 
 interface CrossSectionViewProps {
@@ -57,11 +57,16 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
   const panStartRef                            = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null);
   const { showColor, showNames, showMeasure }  = useThemeFlags(theme);
 
-  const layout   = computeLayout(street);
-  const W        = layout.totalWidthPx;
-  const NAME_H   = street.name ? 24 : 0;
-  const GROUND_Y = NAME_H + layout.skyH;
-  const SVG_H    = GROUND_Y + BAND_H + ANN_H;
+  const layout          = computeLayout(street);
+  const W               = layout.totalWidthPx;
+  const NAME_H          = street.name ? 24 : 0;
+  const GROUND_Y        = NAME_H + layout.skyH;
+  const roadOffsetPx    = ROAD_OFFSET_M * layout.scale;
+  const SVG_H           = GROUND_Y + roadOffsetPx + BAND_H + ANN_H;
+
+  function isRoadLevel(type: string) {
+    return type === "TRAFFIC_LANE" || type === "PARKING_LANE" || type === "BUS_LANE" || type === "CYCLE_LANE_ROAD";
+  }
 
   useEffect(() => { fit(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -355,16 +360,17 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
               const mergedStyle = { ...def.defaultStyle, ...el.style };
               const fill        = showColor ? mergedStyle.fill   : "#ffffff";
               const stroke      = showColor ? mergedStyle.stroke : "#333333";
+              const bandY       = GROUND_Y + (isRoadLevel(el.type) ? roadOffsetPx : 0);
               return (
                 <g key={el.id}>
                   <rect
-                    x={le.x} y={GROUND_Y}
+                    x={le.x} y={bandY}
                     width={le.widthPx} height={BAND_H}
                     fill={fill} stroke={stroke} strokeWidth={0.5}
                   />
                   {isHighlighted && (
                     <rect
-                      x={le.x} y={GROUND_Y}
+                      x={le.x} y={bandY}
                       width={le.widthPx} height={BAND_H}
                       fill="none" stroke="#ef4444" strokeWidth={2}
                     />
@@ -386,7 +392,7 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
                 <g key={`fig-${le.id}`}>
                   {variant.renderSVG({
                     cx:       le.x + le.widthPx / 2,
-                    groundY:  GROUND_Y,
+                    groundY:  GROUND_Y + (isRoadLevel(el.type) ? roadOffsetPx : 0),
                     widthPx:  le.widthPx,
                     scale:    layout.scale,
                     height_m: el.figure.height_m,
@@ -397,7 +403,7 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
 
             {/* Annotation zone — engineering dimension lines */}
             {(() => {
-              const bandBottom = GROUND_Y + BAND_H;
+              const bandBottom = GROUND_Y + roadOffsetPx + BAND_H;
               const TICK_H     = 14; // vertical tick height
               const dimLineY   = bandBottom + TICK_H;
               const labelY     = dimLineY + 12;
@@ -461,14 +467,18 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
             })()}
 
             {/* Vertical separator lines between elements on the ground band */}
-            {layout.elements.map((le) => (
-              <line
-                key={`sep-${le.id}`}
-                x1={le.x} y1={GROUND_Y}
-                x2={le.x} y2={GROUND_Y + BAND_H}
-                stroke="#6b7280" strokeWidth={0.5}
-              />
-            ))}
+            {layout.elements.map((le) => {
+              const el     = street.elements.find((e) => e.id === le.id)!;
+              const bandY  = GROUND_Y + (isRoadLevel(el.type) ? roadOffsetPx : 0);
+              return (
+                <line
+                  key={`sep-${le.id}`}
+                  x1={le.x} y1={bandY}
+                  x2={le.x} y2={bandY + BAND_H}
+                  stroke="#6b7280" strokeWidth={0.5}
+                />
+              );
+            })}
           </svg>
         )}
       </div>
