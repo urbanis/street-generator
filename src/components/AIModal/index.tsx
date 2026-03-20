@@ -57,8 +57,13 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
     setLoading(true);
     setError(null);
     try {
+      const formattedPrompt =
+        `<|im_start|>system\n${SYSTEM_PROMPT}<|im_end|>\n` +
+        `<|im_start|>user\n${prompt.trim()}<|im_end|>\n` +
+        `<|im_start|>assistant\n`;
+
       const res = await fetch(
-        "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct/v1/chat/completions",
+        "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct",
         {
           method: "POST",
           headers: {
@@ -66,19 +71,14 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
             "Authorization": `Bearer ${HF_TOKEN}`,
           },
           body: JSON.stringify({
-            model: "Qwen/Qwen2.5-7B-Instruct",
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              { role: "user",   content: prompt.trim() },
-            ],
-            max_tokens: 800,
-            temperature: 0.3,
+            inputs: formattedPrompt,
+            parameters: { max_new_tokens: 800, temperature: 0.3, return_full_text: false },
           }),
         }
       );
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
-      const raw  = data.choices?.[0]?.message?.content ?? "";
+      const raw  = Array.isArray(data) ? (data[0]?.generated_text ?? "") : "";
 
       // Extract JSON from response (strip any accidental markdown)
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
