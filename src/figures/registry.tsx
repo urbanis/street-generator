@@ -92,12 +92,21 @@ const FIGURE_REGISTRY: Partial<Record<ElementType, FigureVariant[]>> = {
 
   PARKING_LANE: [
     {
-      id: "car-side",
-      label: { de: "PKW (Seitenansicht)", en: "Car (side view)" },
+      id: "car-perpendicular",
+      label: { de: "PKW (Querparken)", en: "Car (perpendicular)" },
       renderSVG: ({ cx, groundY, widthPx, scale: s }) => {
-        const carW = Math.min(4.5 * s, widthPx * 0.8);
+        const carW = Math.min(4.5 * s, widthPx * 0.9);
         const h    = Math.min(carW * (207.35 / 546.01), 1.25 * s);
         return <image href={parkingLeftUrl} x={cx - carW / 2} y={groundY - h} width={carW} height={h} />;
+      },
+    },
+    {
+      id: "car-parallel",
+      label: { de: "PKW (Längsparken)", en: "Car (parallel)" },
+      renderSVG: ({ cx, groundY, scale: s }) => {
+        const h = 1.25 * s;
+        const w = h * (238.5 / 207.35);
+        return <image href={trafficAutoFrontUrl} x={cx - w / 2} y={groundY - h} width={w} height={h} />;
       },
     },
   ],

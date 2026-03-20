@@ -75,7 +75,7 @@ const REGISTRY: ElementDef[] = [
   {
     type: "PARKING_LANE",
     label: { de: "Parkstreifen", en: "Parking lane" },
-    defaultWidth_m: 2.5,
+    defaultWidth_m: 4.8,
     defaultStyle: { fill: "#e0e7ff", stroke: "#6366f1" },
     icon: ParkingSquare,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
