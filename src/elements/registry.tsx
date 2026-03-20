@@ -28,7 +28,7 @@ const REGISTRY: ElementDef[] = [
     type: "CYCLE_LANE",
     label: { de: "Radweg", en: "Cycle lane" },
     defaultWidth_m: 2.0,
-    defaultStyle: { fill: "#bbf7d0", stroke: "#16a34a" },
+    defaultStyle: { fill: "#C4CCB7", stroke: "#7A8C70" },
     icon: Bike,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
       <rect x={x} y={0} width={widthPx} height={heightPx}
@@ -39,7 +39,7 @@ const REGISTRY: ElementDef[] = [
     type: "CYCLE_LANE_ROAD",
     label: { de: "Radfahrstreifen", en: "Cycle lane (road)" },
     defaultWidth_m: 1.5,
-    defaultStyle: { fill: "#bbf7d0", stroke: "#16a34a" },
+    defaultStyle: { fill: "#C4CCB7", stroke: "#7A8C70" },
     icon: Bike,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
       <rect x={x} y={0} width={widthPx} height={heightPx}
@@ -50,7 +50,7 @@ const REGISTRY: ElementDef[] = [
     type: "BUFFER",
     label: { de: "Puffer", en: "Buffer" },
     defaultWidth_m: 0.75,
-    defaultStyle: { fill: "#fef9c3", stroke: "#ca8a04" },
+    defaultStyle: { fill: "#D4CFA0", stroke: "#A8A060" },
     icon: Minus,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
       <g>
@@ -98,7 +98,7 @@ const REGISTRY: ElementDef[] = [
     type: "BUS_LANE",
     label: { de: "Busspur", en: "Bus lane" },
     defaultWidth_m: 3.5,
-    defaultStyle: { fill: "#fde68a", stroke: "#d97706" },
+    defaultStyle: { fill: "#D4CFA0", stroke: "#A8A060" },
     icon: Bus,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
       <rect x={x} y={0} width={widthPx} height={heightPx}
@@ -109,7 +109,7 @@ const REGISTRY: ElementDef[] = [
     type: "MEDIAN",
     label: { de: "Mittelstreifen", en: "Median" },
     defaultWidth_m: 1.5,
-    defaultStyle: { fill: "#d1fae5", stroke: "#059669" },
+    defaultStyle: { fill: "#C4CCB7", stroke: "#7A8C70" },
     icon: AlignCenter,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
       <rect x={x} y={0} width={widthPx} height={heightPx}
@@ -120,7 +120,7 @@ const REGISTRY: ElementDef[] = [
     type: "PLANTING_STRIP",
     label: { de: "Grünstreifen", en: "Planting strip" },
     defaultWidth_m: 1.5,
-    defaultStyle: { fill: "#86efac", stroke: "#15803d" },
+    defaultStyle: { fill: "#C4CCB7", stroke: "#7A8C70" },
     icon: Flower2,
     renderSVG: ({ x, widthPx, heightPx, style }) => (
       <rect x={x} y={0} width={widthPx} height={heightPx}

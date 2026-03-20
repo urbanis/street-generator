@@ -22,10 +22,10 @@ export const DEFAULT_THEME_FLAGS: ThemeFlags = {
 };
 
 const FLOOR_COLORS: Record<string, string> = {
-  Wohnen:     "#fef08a",
-  Gewerbe:    "#fca5a5",
-  Gemischt:   "#fdba74",
-  Öffentlich: "#d1d5db",
+  Wohnen:     "#EDE8C0",
+  Gewerbe:    "#E4B8B4",
+  Gemischt:   "#E4CDB0",
+  Öffentlich: "#D8D9D5",
 };
 
 function wrapLabel(text: string, maxWidthPx: number, fontSize: number): string[] {
@@ -49,7 +49,6 @@ function wrapLabel(text: string, maxWidthPx: number, fontSize: number): string[]
 
 interface CrossSectionViewProps {
   street:           StreetConfig;
-  highlightedIds:   string[];
   showAllFigures:         boolean;
   onShowAllFiguresChange: (v: boolean) => void;
   theme:                  ThemeFlags;
@@ -60,7 +59,7 @@ interface CrossSectionViewProps {
   onClear:          () => void;
 }
 
-export function CrossSectionView({ street, highlightedIds, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear }: CrossSectionViewProps) {
+export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const [zoom, setZoom]                        = useState(1);
   const [isPanning, setIsPanning]              = useState(false);
@@ -381,12 +380,10 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, onSho
             {layout.elements.map((le) => {
               const el            = street.elements.find((e) => e.id === le.id)!;
               const def           = getElementDef(el.type);
-              const isBuilding    = el.type === "BUILDING_LEFT" || el.type === "BUILDING_RIGHT";
-              const isHighlighted = highlightedIds.includes(el.id);
+              const isBuilding = el.type === "BUILDING_LEFT" || el.type === "BUILDING_RIGHT";
 
               if (isBuilding && el.building) {
-                const floorH         = 3 * layout.scale;
-                const totalBuildingH = el.building.floors.length * floorH;
+                const floorH = 3 * layout.scale;
                 return (
                   <g key={el.id}>
                     {/* ground band strip */}
@@ -420,13 +417,6 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, onSho
                         </g>
                       );
                     })}
-                    {isHighlighted && (
-                      <rect
-                        x={le.x} y={GROUND_Y - totalBuildingH}
-                        width={le.widthPx} height={totalBuildingH + BAND_H}
-                        fill="none" stroke="#ef4444" strokeWidth={2}
-                      />
-                    )}
                   </g>
                 );
               }
@@ -443,13 +433,7 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, onSho
                     width={le.widthPx} height={BAND_H}
                     fill={fill} stroke={stroke} strokeWidth={0.5}
                   />
-                  {isHighlighted && (
-                    <rect
-                      x={le.x} y={bandY}
-                      width={le.widthPx} height={BAND_H}
-                      fill="none" stroke="#ef4444" strokeWidth={2}
-                    />
-                  )}
+
                 </g>
               );
             })}

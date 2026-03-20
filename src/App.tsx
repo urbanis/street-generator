@@ -169,7 +169,6 @@ export default function App() {
           <div className={`min-h-64 overflow-hidden lg:min-h-0 lg:col-start-2 lg:row-start-1${!mapVisible ? " lg:row-span-2" : ""}`}>
             <CrossSectionView
               street={street}
-              highlightedIds={highlightedIds}
               showAllFigures={showAllFigures}
               onShowAllFiguresChange={setShowAllFigures}
               theme={theme}

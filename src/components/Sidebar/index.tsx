@@ -51,6 +51,7 @@ export function Sidebar({
   templates, onTemplateApply,
 }: SidebarProps) {
   const t = useT();
+  const hasIssues = results.some((r) => r.status !== "PASS");
 
   return (
     <div className={SIDEBAR}>
@@ -62,7 +63,12 @@ export function Sidebar({
             onClick={() => onTabChange(tab)}
             data-tour={tab === "design" ? "design-tab" : tab === "explore" ? "explore-tab" : tab === "evaluate" ? "evaluate-tab" : undefined}
           >
-            {t(tab === "explore" ? "tabExplore" : tab === "design" ? "tabDesign" : "tabEvaluate")}
+            <span className="relative inline-flex items-center gap-1">
+              {t(tab === "explore" ? "tabExplore" : tab === "design" ? "tabDesign" : "tabEvaluate")}
+              {tab === "evaluate" && hasIssues && (
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+              )}
+            </span>
           </button>
         ))}
       </div>
