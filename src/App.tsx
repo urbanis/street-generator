@@ -97,6 +97,10 @@ export default function App() {
     [results],
   );
 
+  function handleClear() {
+    setStreet((s) => ({ ...s, name: "", subtitle: undefined, elements: [] }));
+  }
+
   function handleStreetGenerated(generated: StreetConfig) {
     setStreet(withDefaultFigures(generated));
     setOsmDisclaimer(true);
@@ -151,10 +155,6 @@ export default function App() {
         <TopBar
           lang={lang}
           onLangChange={setLang}
-          street={street}
-          onStreetImport={(s) => setStreet(withDefaultFigures(s))}
-          onShare={handleShare}
-          shareCopied={shareCopied}
           docsOpen={docsOpen}
           onDocsClose={() => setDocsOpen(false)}
           onReplayTour={handleReplayTour}
@@ -174,6 +174,7 @@ export default function App() {
               onStreetImport={(s) => setStreet(withDefaultFigures(s))}
               onShare={handleShare}
               shareCopied={shareCopied}
+              onClear={handleClear}
             />
           </div>
 

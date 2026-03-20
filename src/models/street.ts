@@ -49,6 +49,7 @@ export interface StreetElement {
 export interface StreetConfig {
   id:           string;
   name:         string;
+  subtitle?:    string;
   totalWidth_m?: number;
   elements:     StreetElement[];
 }

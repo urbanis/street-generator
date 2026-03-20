@@ -1,8 +1,6 @@
 import { useT } from "../../i18n";
 import type { Lang } from "../../i18n";
-import type { StreetConfig } from "../../models/street";
-import { Button } from "@/components/ui/button";
-import { Share2, FileUp, Check, X, HelpCircle } from "lucide-react";
+import { X, HelpCircle } from "lucide-react";
 import {
   TOP_BAR, BRAND_SECTION, BRAND_ICON, BRAND_TITLE, BRAND_VERSION,
   TOOLBAR_SECTION, LANG_INACTIVE,
@@ -11,38 +9,13 @@ import {
 interface TopBarProps {
   lang: Lang;
   onLangChange: (lang: Lang) => void;
-  street: StreetConfig;
-  onStreetImport: (street: StreetConfig) => void;
-  onShare: () => void;
-  shareCopied: boolean;
   docsOpen: boolean;
   onDocsClose: () => void;
   onReplayTour: () => void;
 }
 
-export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopied, docsOpen, onDocsClose, onReplayTour }: TopBarProps) {
+export function TopBar({ lang, onLangChange, docsOpen, onDocsClose, onReplayTour }: TopBarProps) {
   const t = useT();
-
-  function handleImport() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const street = JSON.parse(reader.result as string) as StreetConfig;
-          onStreetImport(street);
-        } catch {
-          alert("Invalid JSON file");
-        }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
-  }
 
   return (
     <>
@@ -54,14 +27,6 @@ export function TopBar({ lang, onLangChange, onStreetImport, onShare, shareCopie
         </div>
 
         <div className={TOOLBAR_SECTION}>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleImport} title={t("importJson")} aria-label={t("importJson")}>
-            <FileUp size={14} />
-          </Button>
-
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onShare} title={shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : t("share")} aria-label={t("share")}>
-            {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
-          </Button>
-
           <select
             className="h-7 px-1.5 text-xs text-muted-foreground bg-background border border-border rounded cursor-pointer"
             value={lang}

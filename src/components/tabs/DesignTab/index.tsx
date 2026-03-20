@@ -120,6 +120,12 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
           value={street.name}
           onChange={(e) => onStreetChange({ ...street, name: e.target.value })}
         />
+        <Input
+          className="h-6 text-[10px] text-muted-foreground"
+          placeholder={t("streetSubtitlePlaceholder")}
+          value={street.subtitle ?? ""}
+          onChange={(e) => onStreetChange({ ...street, subtitle: e.target.value || undefined })}
+        />
       </div>
 
       <div className="flex flex-col gap-1 border-b border-border pb-2">

@@ -6,7 +6,7 @@ import { computeLayout, BAND_H, ANN_H, ROAD_OFFSET_M } from "./renderer";
 import { getFigureVariants } from "../../figures/registry";
 import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./styles";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, Maximize2, Download, FileUp, Share2, Check } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2 } from "lucide-react";
 
 export type SvgTheme =
   | "full"
@@ -38,6 +38,25 @@ const FLOOR_COLORS: Record<string, string> = {
   Öffentlich: "#d1d5db",
 };
 
+function wrapLabel(text: string, maxWidthPx: number, fontSize: number): string[] {
+  const avgCharW = fontSize * 0.55;
+  const maxChars = Math.max(1, Math.floor(maxWidthPx / avgCharW));
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length <= maxChars) {
+      current = candidate;
+    } else {
+      if (current) lines.push(current);
+      current = word.length > maxChars ? word.slice(0, maxChars) : word;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}
+
 interface CrossSectionViewProps {
   street:           StreetConfig;
   highlightedIds:   string[];
@@ -46,9 +65,10 @@ interface CrossSectionViewProps {
   onStreetImport:   (street: StreetConfig) => void;
   onShare:          () => void;
   shareCopied:      boolean;
+  onClear:          () => void;
 }
 
-export function CrossSectionView({ street, highlightedIds, showAllFigures, theme, onStreetImport, onShare, shareCopied }: CrossSectionViewProps) {
+export function CrossSectionView({ street, highlightedIds, showAllFigures, theme, onStreetImport, onShare, shareCopied, onClear }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const [zoom, setZoom]                        = useState(1);
   const [isPanning, setIsPanning]              = useState(false);
@@ -59,7 +79,7 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
 
   const layout          = computeLayout(street);
   const W               = layout.totalWidthPx;
-  const NAME_H          = street.name ? 24 : 0;
+  const NAME_H          = (street.name ? 18 : 0) + (street.subtitle ? 14 : 0);
   const GROUND_Y        = NAME_H + layout.skyH;
   const roadOffsetPx    = ROAD_OFFSET_M * layout.scale;
   const SVG_H           = GROUND_Y + roadOffsetPx + BAND_H + ANN_H;
@@ -68,7 +88,12 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
     return type === "TRAFFIC_LANE" || type === "PARKING_LANE" || type === "BUS_LANE" || type === "CYCLE_LANE_ROAD";
   }
 
-  useEffect(() => { fit(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!wrapRef.current) return;
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(wrapRef.current);
+    return () => ro.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleImport() {
     const input = document.createElement("input");
@@ -232,38 +257,51 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
     <div className={CROSS_SECTION_VIEW}>
       <div className={CSV_HEADER}>
         <div className={CSV_CONTROLS}>
+          {/* Trash — far left */}
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 text-muted-foreground hover:text-destructive" onClick={onClear} title={lang === "de" ? "Zeichnung löschen" : "Clear drawing"} aria-label={lang === "de" ? "Zeichnung löschen" : "Clear drawing"}>
+            <Trash2 size={14} />
+          </Button>
+
+          {/* Left spacer — pushes zoom to center */}
+          <div className="flex-1" />
+
+          {/* Zoom controls — center */}
           <div className="flex items-center gap-0.5 border border-border rounded shrink-0">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title="Zoom in"><ZoomIn size={12} /></Button>
             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title="Fit"><Maximize2 size={11} /></Button>
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title="Zoom out"><ZoomOut size={12} /></Button>
           </div>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={handleImport} title={lang === "de" ? "JSON importieren" : "Import JSON"} aria-label={lang === "de" ? "JSON importieren" : "Import JSON"}>
-            <FileUp size={14} />
-          </Button>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : (lang === "de" ? "Teilen" : "Share")} aria-label={lang === "de" ? "Teilen" : "Share"}>
-            {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
-          </Button>
-          {/* Export — Download icon button with invisible select overlay for native picker */}
-          <div className="relative shrink-0 ml-auto" data-tour="export-btn" title={lang === "de" ? "Exportieren" : "Export"}>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 border border-input pointer-events-none" tabIndex={-1} aria-hidden>
-              <Download size={14} />
+
+          {/* Right group — import, share, download */}
+          <div className="flex-1 flex items-center justify-end gap-1">
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={handleImport} title={lang === "de" ? "JSON importieren" : "Import JSON"} aria-label={lang === "de" ? "JSON importieren" : "Import JSON"}>
+              <FileUp size={14} />
             </Button>
-            <select
-              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-              defaultValue=""
-              onChange={(e) => {
-                const fmt = e.target.value;
-                e.target.value = "";
-                if (fmt === "png") exportPng();
-                else if (fmt === "svg") exportSvg();
-                else if (fmt === "json") exportJson();
-              }}
-            >
-              <option value="" disabled>{lang === "de" ? "Exportieren" : "Export"}</option>
-              <option value="png">PNG</option>
-              <option value="svg">SVG</option>
-              <option value="json">JSON</option>
-            </select>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : (lang === "de" ? "Teilen" : "Share")} aria-label={lang === "de" ? "Teilen" : "Share"}>
+              {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
+            </Button>
+            {/* Export — Download icon button with invisible select overlay for native picker */}
+            <div className="relative shrink-0" data-tour="export-btn" title={lang === "de" ? "Exportieren" : "Export"}>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 pointer-events-none" tabIndex={-1} aria-hidden>
+                <FileDown size={14} />
+              </Button>
+              <select
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                defaultValue=""
+                onChange={(e) => {
+                  const fmt = e.target.value;
+                  e.target.value = "";
+                  if (fmt === "png") exportPng();
+                  else if (fmt === "svg") exportSvg();
+                  else if (fmt === "json") exportJson();
+                }}
+              >
+                <option value="" disabled>{lang === "de" ? "Exportieren" : "Export"}</option>
+                <option value="png">PNG</option>
+                <option value="svg">SVG</option>
+                <option value="json">JSON</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -291,14 +329,15 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
             xmlns="http://www.w3.org/2000/svg"
             className="block"
           >
-            {/* Street name */}
+            {/* Street name + subtitle */}
             {street.name && (
-              <text
-                x={W / 2} y={12}
-                textAnchor="middle" dominantBaseline="middle"
-                fontSize={11} fontWeight="600" fill="#111827"
-              >
+              <text x={W / 2} y={12} textAnchor="middle" dominantBaseline="middle" fontSize={11} fontWeight="600" fill="#111827">
                 {street.name}
+              </text>
+            )}
+            {street.subtitle && (
+              <text x={W / 2} y={(street.name ? 18 : 0) + 7} textAnchor="middle" dominantBaseline="middle" fontSize={8} fill="#6b7280">
+                {street.subtitle}
               </text>
             )}
 
@@ -441,12 +480,20 @@ export function CrossSectionView({ street, highlightedIds, showAllFigures, theme
                             {el.width_m.toFixed(2)} m
                           </text>
                         )}
-                        {/* Label — below dim line */}
-                        {!tooNarrow && showNames && (
-                          <text x={cx} y={labelY} textAnchor="middle" dominantBaseline="hanging" fontSize={9} fill="#374151">
-                            {el.label || def.label[lang]}
-                          </text>
-                        )}
+                        {/* Label — below dim line, wrapped */}
+                        {!tooNarrow && showNames && (() => {
+                          const label    = el.label || def.label[lang];
+                          const fontSize = 8;
+                          const lineH    = fontSize + 2;
+                          const lines    = wrapLabel(label, le.widthPx - 4, fontSize);
+                          return (
+                            <text x={cx} y={labelY} textAnchor="middle" dominantBaseline="hanging" fontSize={fontSize} fill="#374151">
+                              {lines.map((line, i) => (
+                                <tspan key={i} x={cx} dy={i === 0 ? 0 : lineH}>{line}</tspan>
+                              ))}
+                            </text>
+                          );
+                        })()}
                       </g>
                     );
                   })}
