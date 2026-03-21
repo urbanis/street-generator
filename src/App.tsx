@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Heart } from "lucide-react";
 import type { StreetConfig } from "./models/street";
 import type { MapReference } from "./models/map";
 import { runValidation } from "./rules/engine";
@@ -23,6 +24,7 @@ import { getDefaultFigureVariant } from "./figures/registry";
 
 const LANG_KEY = "berlin-street-designer-lang";
 const TOUR_KEY = "berlin-street-designer-tour-done";
+const DARK_KEY = "berlin-street-designer-dark";
 
 function withDefaultFigures(config: StreetConfig): StreetConfig {
   return {
@@ -54,6 +56,11 @@ export default function App() {
     const saved = localStorage.getItem(LANG_KEY);
     return (saved === "en" || saved === "de") ? saved : "de";
   });
+  const [darkMode, setDarkMode]           = useState(() => {
+    const saved = localStorage.getItem(DARK_KEY) === "1";
+    document.documentElement.classList.toggle("dark", saved);
+    return saved;
+  });
   const [street, setStreet]               = useState<StreetConfig>(getDefaultStreet);
   const [mapReference, setMapReference]   = useState<MapReference | null>(null);
   const [activeTab, setActiveTab]         = useState<Tab>("design");
@@ -76,6 +83,10 @@ export default function App() {
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
+  useEffect(() => {
+    localStorage.setItem(DARK_KEY, darkMode ? "1" : "0");
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
 
   // Switch sidebar tab when the tour step requires it
   useEffect(() => {
@@ -161,6 +172,8 @@ export default function App() {
         <TopBar
           lang={lang}
           onLangChange={setLang}
+          darkMode={darkMode}
+          onDarkModeToggle={() => setDarkMode((d) => !d)}
           docsOpen={docsOpen}
           onDocsClose={() => setDocsOpen(false)}
           onReplayTour={handleReplayTour}
@@ -187,7 +200,7 @@ export default function App() {
           </div>
 
           {/* Sidebar — row 2 on mobile (DOM order), left column spanning both rows on desktop */}
-          <div className="lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:h-full">
+          <div className="h-[60vh] lg:h-full lg:col-start-1 lg:row-start-1 lg:row-span-2">
             <Sidebar
               activeTab={activeTab}
               onTabChange={setActiveTab}
@@ -239,9 +252,9 @@ export default function App() {
         href="https://www.buymeacoffee.com/streetgenerator"
         target="_blank"
         rel="noopener noreferrer"
-        className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1.5 h-9 px-4 text-sm font-medium rounded-full bg-[#FFDD00] text-[#000000] shadow-lg hover:bg-[#FFDD00]/80 transition-colors"
+        className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1.5 h-9 px-4 text-sm font-medium rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/80 transition-colors"
       >
-        ☕ Support
+        <Heart size={14} /> Support
       </a>
 
       {showWelcome && (

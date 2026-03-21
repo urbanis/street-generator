@@ -1,6 +1,6 @@
 import { useT } from "../../i18n";
 import type { Lang } from "../../i18n";
-import { X, HelpCircle } from "lucide-react";
+import { X, HelpCircle, Sun, Moon, Heart } from "lucide-react";
 import {
   TOP_BAR, BRAND_SECTION, BRAND_ICON, BRAND_TITLE, BRAND_VERSION,
   TOOLBAR_SECTION, LANG_INACTIVE,
@@ -9,12 +9,14 @@ import {
 interface TopBarProps {
   lang: Lang;
   onLangChange: (lang: Lang) => void;
+  darkMode: boolean;
+  onDarkModeToggle: () => void;
   docsOpen: boolean;
   onDocsClose: () => void;
   onReplayTour: () => void;
 }
 
-export function TopBar({ lang, onLangChange, docsOpen, onDocsClose, onReplayTour }: TopBarProps) {
+export function TopBar({ lang, onLangChange, darkMode, onDarkModeToggle, docsOpen, onDocsClose, onReplayTour }: TopBarProps) {
   const t = useT();
 
   return (
@@ -25,9 +27,9 @@ export function TopBar({ lang, onLangChange, docsOpen, onDocsClose, onReplayTour
           href="https://www.buymeacoffee.com/streetgenerator"
           target="_blank"
           rel="noopener noreferrer"
-          className="hidden lg:flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium rounded bg-[#FFDD00] text-[#000000] hover:bg-[#FFDD00]/80 transition-colors shrink-0"
+          className="hidden lg:flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium rounded bg-primary text-primary-foreground hover:bg-primary/80 transition-colors shrink-0"
         >
-          ☕ Support
+          <Heart size={12} /> Support
         </a>
 
         <div className={BRAND_SECTION}>
@@ -46,6 +48,14 @@ export function TopBar({ lang, onLangChange, docsOpen, onDocsClose, onReplayTour
             <option value="de">DE</option>
             <option value="en">EN</option>
           </select>
+          <button
+            onClick={onDarkModeToggle}
+            className={LANG_INACTIVE}
+            title={darkMode ? (lang === "de" ? "Heller Modus" : "Light mode") : (lang === "de" ? "Dunkler Modus" : "Dark mode")}
+            aria-label={darkMode ? "Light mode" : "Dark mode"}
+          >
+            {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
           <button
             onClick={onReplayTour}
             className={LANG_INACTIVE}

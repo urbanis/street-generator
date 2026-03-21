@@ -107,7 +107,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
       )}
 
       <div className="flex flex-col gap-1">
-        <Label className="text-xs">{t("streetName")}</Label>
+        <Label className="text-xs font-medium">{t("streetName")}</Label>
         <Input
           className="h-7 text-xs"
           placeholder={t("streetNamePlaceholder")}
@@ -115,7 +115,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
           onChange={(e) => onStreetChange({ ...street, name: e.target.value })}
         />
         <Input
-          className="h-6 text-[10px] text-muted-foreground"
+          className="h-7 text-xs text-muted-foreground"
           placeholder={t("streetSubtitlePlaceholder")}
           value={street.subtitle ?? ""}
           onChange={(e) => onStreetChange({ ...street, subtitle: e.target.value || undefined })}
@@ -123,7 +123,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
       </div>
 
       <div className="flex flex-col gap-1 border-b border-border pb-2">
-        <Label className="text-xs text-muted-foreground">{t("template")}</Label>
+        <Label className="text-xs font-medium">{t("template")}</Label>
         <select
           className="h-7 w-full rounded border border-input bg-background px-1.5 text-xs text-foreground"
           defaultValue=""

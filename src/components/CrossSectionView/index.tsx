@@ -75,8 +75,11 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
   const [zoom, setZoom]                        = useState(1);
   const [isPanning, setIsPanning]              = useState(false);
   const [aiModalOpen, setAiModalOpen]          = useState(false);
+  const [exportOpen, setExportOpen]            = useState(false);
+  const [exportPos, setExportPos]              = useState<{ top: number; right: number } | null>(null);
   const svgRef                                 = useRef<SVGSVGElement>(null);
   const wrapRef                                = useRef<HTMLDivElement>(null);
+  const exportBtnRef                           = useRef<HTMLDivElement>(null);
   const panStartRef                            = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null);
   const { showColor, showLabels: showNames, showMeasure } = theme;
 
@@ -321,45 +324,64 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             <Sparkles size={12} />
           </Button>
 
-          {/* Left spacer — pushes zoom to center */}
-          <div className="flex-1" />
+          {/* Left spacer — pushes zoom to center (desktop only) */}
+          <div className="hidden md:block flex-1" />
 
           {/* Zoom controls — center */}
           <div className="flex items-center gap-0.5 border border-border rounded shrink-0">
-            <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title={lang === "de" ? "Vergrößern" : "Zoom in"}><ZoomIn size={12} /></Button>
+            <Button variant="ghost" size="sm" className="hidden md:flex h-9 w-9 md:h-7 md:w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title={lang === "de" ? "Vergrößern" : "Zoom in"}><ZoomIn size={12} /></Button>
             <Button variant="ghost" size="sm" className="h-9 px-2 md:h-7 md:px-1.5 text-xs" onClick={fit} title={t("fitMap")}><Maximize2 size={11} /></Button>
-            <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title={lang === "de" ? "Verkleinern" : "Zoom out"}><ZoomOut size={12} /></Button>
+            <Button variant="ghost" size="sm" className="hidden md:flex h-9 w-9 md:h-7 md:w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title={lang === "de" ? "Verkleinern" : "Zoom out"}><ZoomOut size={12} /></Button>
           </div>
 
           {/* Right group — import, share, download */}
-          <div className="flex-1 flex items-center justify-end gap-1">
+          <div className="ml-auto flex items-center gap-1">
             <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0 shrink-0" onClick={handleImport} title={t("importJson")} aria-label={t("importJson")}>
               <FileUp size={14} />
             </Button>
             <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? t("copied") : t("share")} aria-label={t("share")}>
               {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
             </Button>
-            {/* Export — Download icon button with invisible select overlay for native picker */}
-            <div className="relative shrink-0" data-tour="export-btn" title={t("exportLabel")}>
-              <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0 pointer-events-none" tabIndex={-1} aria-hidden>
-                <FileDown size={14} />
-              </Button>
-              <select
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                defaultValue=""
-                onChange={(e) => {
-                  const fmt = e.target.value;
-                  e.target.value = "";
-                  if (fmt === "png") exportPng();
-                  else if (fmt === "svg") exportSvg();
-                  else if (fmt === "json") exportJson();
+            {/* Export — custom dropdown, dark-mode friendly */}
+            <div className="relative shrink-0" data-tour="export-btn" ref={exportBtnRef}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 w-9 md:h-7 md:w-7 p-0"
+                title={t("exportLabel")}
+                onClick={() => {
+                  if (!exportBtnRef.current) return;
+                  const rect = exportBtnRef.current.getBoundingClientRect();
+                  setExportPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+                  setExportOpen((o) => !o);
                 }}
               >
-                <option value="" disabled>{t("exportLabel")}</option>
-                <option value="png">PNG</option>
-                <option value="svg">SVG</option>
-                <option value="json">JSON</option>
-              </select>
+                <FileDown size={14} />
+              </Button>
+              {exportOpen && exportPos && (
+                <>
+                  <div className="fixed inset-0 z-[1500]" onClick={() => setExportOpen(false)} />
+                  <div
+                    className="fixed z-[1501] min-w-[80px] rounded border border-border bg-background shadow-md"
+                    style={{ top: exportPos.top, right: exportPos.right }}
+                  >
+                    {(["PNG", "SVG", "JSON"] as const).map((fmt) => (
+                      <button
+                        key={fmt}
+                        className="block w-full px-3 py-1.5 text-left text-xs hover:bg-accent hover:text-accent-foreground"
+                        onClick={() => {
+                          setExportOpen(false);
+                          if (fmt === "PNG") exportPng();
+                          else if (fmt === "SVG") exportSvg();
+                          else exportJson();
+                        }}
+                      >
+                        {fmt}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
