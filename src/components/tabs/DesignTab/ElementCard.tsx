@@ -124,7 +124,7 @@ export function ElementCard({
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 shrink-0"
+          className="h-9 w-9 md:h-6 md:w-6 shrink-0"
           onClick={() => setIsOpen((o) => !o)}
         >
           <ChevronRight
@@ -134,13 +134,13 @@ export function ElementCard({
         </Button>
 
         {/* Up / Down / Delete */}
-        <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onMoveUp} disabled={index === 0}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 md:h-6 md:w-6 shrink-0" onClick={onMoveUp} disabled={index === 0}>
           <ChevronUp size={12} />
         </Button>
-        <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onMoveDown} disabled={index === total - 1}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 md:h-6 md:w-6 shrink-0" onClick={onMoveDown} disabled={index === total - 1}>
           <ChevronDown size={12} />
         </Button>
-        <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive" onClick={onRemove}>
+        <Button variant="ghost" size="icon" className="h-9 w-9 md:h-6 md:w-6 shrink-0 text-muted-foreground hover:text-destructive" onClick={onRemove}>
           <X size={12} />
         </Button>
       </div>

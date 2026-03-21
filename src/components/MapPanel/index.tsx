@@ -226,8 +226,8 @@ export function MapPanel({
   return (
     <div className="relative h-full w-full">
       <MapContainer
-        center={[52.52, 13.405]}
-        zoom={12}
+        center={window.innerWidth < 768 ? [52.5203, 13.3878] : [52.52, 13.405]}
+        zoom={window.innerWidth < 768 ? 14 : 12}
         className={MAP_PANEL}
         zoomControl={true}
       >

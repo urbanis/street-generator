@@ -261,7 +261,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
       <div className={CSV_HEADER}>
         <div className={CSV_CONTROLS}>
           {/* Trash — far left */}
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 text-muted-foreground hover:text-destructive" onClick={onClear} title={t("clearDrawing")} aria-label={t("clearDrawing")}>
+          <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0 shrink-0 text-muted-foreground hover:text-destructive" onClick={onClear} title={t("clearDrawing")} aria-label={t("clearDrawing")}>
             <Trash2 size={14} />
           </Button>
 
@@ -270,7 +270,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             <Button
               variant="ghost"
               size="sm"
-              className={cn("h-7 w-7 p-0", theme.showColor && "bg-accent text-accent-foreground")}
+              className={cn("h-9 w-9 md:h-7 md:w-7 p-0", theme.showColor && "bg-accent text-accent-foreground")}
               onClick={() => onThemeChange({ ...theme, showColor: !theme.showColor })}
               title={t("themeColor")}
               aria-pressed={theme.showColor}
@@ -280,7 +280,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             <Button
               variant="ghost"
               size="sm"
-              className={cn("h-7 w-7 p-0", theme.showLabels && "bg-accent text-accent-foreground")}
+              className={cn("h-9 w-9 md:h-7 md:w-7 p-0", theme.showLabels && "bg-accent text-accent-foreground")}
               onClick={() => onThemeChange({ ...theme, showLabels: !theme.showLabels })}
               title={t("themeLabels")}
               aria-pressed={theme.showLabels}
@@ -290,7 +290,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             <Button
               variant="ghost"
               size="sm"
-              className={cn("h-7 w-7 p-0", theme.showMeasure && "bg-accent text-accent-foreground")}
+              className={cn("h-9 w-9 md:h-7 md:w-7 p-0", theme.showMeasure && "bg-accent text-accent-foreground")}
               onClick={() => onThemeChange({ ...theme, showMeasure: !theme.showMeasure })}
               title={t("themeMeasures")}
               aria-pressed={theme.showMeasure}
@@ -300,7 +300,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             <Button
               variant="ghost"
               size="sm"
-              className={cn("h-7 w-7 p-0", showAllFigures && "bg-accent text-accent-foreground")}
+              className={cn("h-9 w-9 md:h-7 md:w-7 p-0", showAllFigures && "bg-accent text-accent-foreground")}
               onClick={() => onShowAllFiguresChange(!showAllFigures)}
               title={t("figures")}
               aria-pressed={showAllFigures}
@@ -313,7 +313,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 shrink-0"
+            className="h-9 w-9 md:h-7 md:w-7 p-0 shrink-0"
             onClick={() => setAiModalOpen(true)}
             title={t("generateStreet")}
             aria-label={t("generateStreet")}
@@ -326,22 +326,22 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
 
           {/* Zoom controls — center */}
           <div className="flex items-center gap-0.5 border border-border rounded shrink-0">
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title={lang === "de" ? "Vergrößern" : "Zoom in"}><ZoomIn size={12} /></Button>
-            <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title={t("fitMap")}><Maximize2 size={11} /></Button>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title={lang === "de" ? "Verkleinern" : "Zoom out"}><ZoomOut size={12} /></Button>
+            <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title={lang === "de" ? "Vergrößern" : "Zoom in"}><ZoomIn size={12} /></Button>
+            <Button variant="ghost" size="sm" className="h-9 px-2 md:h-7 md:px-1.5 text-xs" onClick={fit} title={t("fitMap")}><Maximize2 size={11} /></Button>
+            <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title={lang === "de" ? "Verkleinern" : "Zoom out"}><ZoomOut size={12} /></Button>
           </div>
 
           {/* Right group — import, share, download */}
           <div className="flex-1 flex items-center justify-end gap-1">
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={handleImport} title={t("importJson")} aria-label={t("importJson")}>
+            <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0 shrink-0" onClick={handleImport} title={t("importJson")} aria-label={t("importJson")}>
               <FileUp size={14} />
             </Button>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? t("copied") : t("share")} aria-label={t("share")}>
+            <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? t("copied") : t("share")} aria-label={t("share")}>
               {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
             </Button>
             {/* Export — Download icon button with invisible select overlay for native picker */}
             <div className="relative shrink-0" data-tour="export-btn" title={t("exportLabel")}>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 pointer-events-none" tabIndex={-1} aria-hidden>
+              <Button variant="ghost" size="sm" className="h-9 w-9 md:h-7 md:w-7 p-0 pointer-events-none" tabIndex={-1} aria-hidden>
                 <FileDown size={14} />
               </Button>
               <select
