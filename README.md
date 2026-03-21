@@ -148,6 +148,12 @@ Each rule is independently testable and exposes bilingual messages (DE/EN).
 
 ---
 
+## Analytics
+
+Anonymous usage analytics via **PostHog** (EU servers, GDPR-compliant). No personal data, no street content, no location data is collected. See [docs/analytics.md](docs/analytics.md) for the full list of tracked events and opt-out instructions.
+
+---
+
 ## Tech stack
 
 | Layer | Choice |
@@ -157,6 +163,7 @@ Each rule is independently testable and exposes bilingual messages (DE/EN).
 | Map | Leaflet + OpenStreetMap tiles |
 | LLM inference | Groq API — `llama-3.1-8b-instant` |
 | Street data | OpenStreetMap via Overpass API |
+| Analytics | PostHog (EU) |
 | Deployment | Vercel (static, CDN edge) |
 | i18n | Custom typed translation registry (DE / EN) |
 
