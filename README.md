@@ -1,169 +1,178 @@
-# Berlin Cross-Section Validator
+# Street Generator
 
-A browser-based tool for designing and validating street cross-sections against Berlin planning standards. Build a street profile element by element, check it against official width requirements, explore real streets on the map, and export your design.
+> Design, evaluate, and export urban street cross-sections — from scratch, from real OpenStreetMap data, or from a natural language description.
 
-Available in **English** and **German** — toggle the language in the top bar.
-
----
-
-## What you can do
-
-- **Design** a street cross-section from scratch or from a template
-- **Validate** it instantly against 10 rules based on the German RASt guidelines
-- **Explore** Berlin's streets on an interactive map with satellite imagery, measurements, and live OpenStreetMap data
-- **Export** your cross-section as SVG, PNG, or JSON
+**Live:** [streetgenerator.com](https://streetgenerator.com) · Available in **English** and **German**
 
 ---
 
-## Getting started
+## Overview
 
-The screen is divided into two areas:
+Street Generator is a browser-based tool for urban planners, architects, and transport engineers. It replaces time-consuming CAD workflows for quick street cross-section sketches with a live, shareable, exportable web application.
 
-- **Left sidebar** — your workspace (Design, Explore, Evaluate tabs)
-- **Right panel** — the live cross-section preview
+Core capabilities:
+- **Design** a street profile manually or from a template
+- **Import** real street data from OpenStreetMap by clicking on the map
+- **Generate** a layout from a plain-language description using an LLM
+- **Validate** the design against Berlin's RASt planning guidelines
+- **Export** as PNG, SVG, or JSON
 
-To start quickly, use the **New street** dropdown in the cross-section header to load a template:
+---
 
-| Template | Description |
+## Architecture
+
+Fully client-side SPA — no backend, no database. All state lives in the browser. The build is deployed as a static bundle on Vercel's CDN edge network, which means zero infrastructure overhead and global availability without scaling concerns.
+
+```
+User Input
+    │
+    ├── Manual Editor (DesignTab)
+    ├── OSM Import ──► Overpass API ──► interpreter.ts ──► mapper.ts
+    └── AI Generate ──► Groq API ──► JSON validation
+              │
+              ▼
+        StreetConfig          ← single typed model, the contract across all layers
+              │
+              ├── renderer.ts          (layout computation — pure TS, no DOM)
+              │        │
+              │   CrossSectionView     (SVG rendering — React)
+              │        │
+              │   ┌────┴────────────┐
+              │  Export          Evaluate
+              │ (PNG/SVG/JSON)  (rules engine)
+              │
+              └── URL serialization   (shareable link, no auth required)
+```
+
+### Core data model
+
+The entire application is built around a single typed model:
+
+```ts
+interface StreetConfig {
+  id:       string;
+  name:     string;
+  subtitle?: string;
+  elements: StreetElement[];   // ordered left → right
+}
+
+interface StreetElement {
+  type:      ElementType;      // SIDEWALK | TRAFFIC_LANE | CYCLE_LANE | PARKING_LANE | ...
+  width_m:   number;
+  figure?:   FigureConfig;     // pedestrian, car, tree SVG variants
+  building?: BuildingData;     // floor-by-floor land use (only for BUILDING_LEFT/RIGHT)
+}
+```
+
+This model is the contract between every layer — editor, renderer, validator, and exporter all consume the same structure. Swapping any layer doesn't require changes to the others.
+
+---
+
+## Integrations
+
+### Overpass API — Real street data from OpenStreetMap
+
+When a user clicks a street on the map, the app sends a bounding-box query to the public Overpass API:
+
+```
+[out:json][timeout:10];
+way["highway"](bbox);
+out tags 1;
+```
+
+The raw OSM tags (`lanes`, `cycleway:left`, `parking:lane:right`, `width`, etc.) go through a two-stage pipeline:
+
+1. **`interpreter.ts`** — normalises tag variants and edge cases into a clean `InterpretedTags` struct. OSM tagging is inconsistent across contributors; this layer absorbs that inconsistency.
+2. **`mapper.ts`** — converts interpreted tags into a `StreetConfig`. Lane width is computed from measured road width ÷ lane count where available, defaulting to 3.25 m. Bicycle roads, one-way streets, and separated cycle tracks are handled as distinct cases.
+
+This two-stage separation keeps the mapping logic fully testable without a live API call.
+
+### Groq API — Natural language to street layout
+
+Users can describe a street in plain text and receive a full `StreetConfig` JSON back.
+
+| Decision | Rationale |
 |---|---|
-| New empty street | Blank canvas |
-| Residential street | 2 lanes, sidewalks, planting strips, buildings |
-| Main road | 4 lanes, median, cycle lanes, parking, sidewalks, buildings |
+| Model: `llama-3.1-8b-instant` | Sub-second inference — latency matters in an interactive design tool |
+| Temperature: 0.3 | Deterministic structured output over creativity |
+| Output: JSON-only | System prompt constrains the model to emit raw JSON, no markdown |
+| Validation layer | Response is filtered against a strict `VALID_TYPES` allowlist before touching the UI — hallucinations cannot corrupt the data model |
+| Rate limiting | localStorage gate (1 free generation per browser) — no auth server required |
+
+The Groq endpoint is OpenAI-compatible, making provider swaps a one-line change.
+
+### Client-side export pipeline
+
+All exports happen in the browser — no server-side rendering:
+
+- **SVG**: clone the live SVG element → inline external image assets as base64 → serialize. Dark-mode palette colors are remapped to light-mode equivalents so exports are always print-ready on white.
+- **PNG**: SVG → Blob URL → `<img>` → Canvas API at 3× resolution → `toBlob()`. The custom font (ITC Avant Garde) is embedded as base64 so typography is preserved when the file is opened offline.
+- **JSON**: `JSON.stringify(streetConfig)` — the model is the file format.
+
+### URL-based state sharing
+
+The full `StreetConfig` is serialized and encoded into the URL hash. Sharing a design requires no account, no backend, and no session — one link contains the entire design state.
 
 ---
 
-## Design tab
+## Rendering engine
 
-This is where you build your street profile.
+`renderer.ts` computes a pixel layout from the street model at runtime. Key decisions:
 
-### Street name
+- **Scale** is derived from total street width, constrained to a max canvas width of 900 px (min 20 px/m, max 60 px/m)
+- **`skyH`** (vertical space above the ground band) accounts for building floor heights, tree heights, and figure heights — each figure variant declares its real-world height in meters, and the renderer calculates the required space dynamically
+- **Road offset**: road-level elements (`TRAFFIC_LANE`, `PARKING_LANE`, etc.) sit 0.20 m below sidewalk level, reflecting real kerb geometry
 
-Type a name at the top — it appears in the cross-section preview and in exported files.
-
-### Adding elements
-
-Click any element in the palette to add it to your street. Elements are laid out from left to right in the order you add them.
-
-| Element | What it represents |
-|---|---|
-| Sidewalk | Pedestrian footpath |
-| Cycle lane | Dedicated bicycle path |
-| Buffer | Safety gap between a cycle lane and traffic |
-| Parking lane | On-street parking strip |
-| Traffic lane | Car or mixed-traffic lane |
-| Bus lane | Dedicated bus lane |
-| Median | Central dividing strip |
-| Planting strip | Green strip with trees or vegetation |
-| Building (left / right) | Building facade at the street edge |
-
-### Editing an element
-
-Click the **arrow** on any element card to expand it. Inside you can:
-
-- **Rename** it — type a custom label, or leave it blank to use the default name
-- **Set the width** in metres
-- **Change the side** (Left, Centre, Right)
-- **Adjust colours** (fill and stroke)
-- **Buildings only**: add or remove floors and set each floor's use (Residential, Commercial, Mixed, Public)
-
-### Reordering
-
-Grab the grip handle on the left of any card and drag it to a new position. You can also use the up/down arrow buttons.
-
-### Expand / collapse all
-
-Use the **Expand all / Collapse all** button above the element list to open or close all cards at once.
+The renderer is pure TypeScript — no React, no DOM dependency. `CrossSectionView` consumes its output and maps it to SVG elements, keeping layout logic fully separated from rendering.
 
 ---
 
-## Cross-section preview
+## Compliance validation
 
-The right panel shows a live drawing of your street, updated instantly as you make changes.
-
-### Style
-
-Choose a display style from the dropdown:
-
-| Style | What it shows |
-|---|---|
-| Full | Colours, labels, and measurements |
-| Colour + labels | Colours and element names |
-| Outline + labels | Black and white with names |
-| Outline + labels + measurements | Black and white with names and widths |
-| Outline + measurements | Black and white with widths only |
-
-### Zoom
-
-Use **Zoom in**, **Fit**, and **Zoom out** to adjust the view. **Fit** scales the drawing to fill the available space automatically.
-
-### Export
-
-| Format | Best for |
-|---|---|
-| SVG | Presentations and print — scales to any size without losing quality |
-| PNG | Inserting into documents, slides, or emails |
-| JSON | Saving and sharing your design — can be loaded back into the tool |
-
----
-
-## Evaluate tab
-
-Every time you edit your street, the tool automatically checks it against 10 width rules from the German **RASt** (Richtlinien für die Anlage von Stadtstraßen) guidelines.
-
-Each rule shows one of three results:
-
-- **PASS** — meets the requirement
-- **WARN** — acceptable but worth reviewing
-- **FAIL** — does not meet the minimum requirement
-
-### Rules checked
+`rules/engine.ts` runs a declarative set of checks against a `StreetConfig` and returns `PASS | WARN | FAIL` results with affected element IDs highlighted in the UI. Rules are based on Berlin's **RASt** (Richtlinien für die Anlage von Stadtstraßen) guidelines.
 
 | Rule | Element | Requirement |
 |---|---|---|
-| R01 | Sidewalk | At least 2.5 m |
-| R02 | Cycle lane | At least 1.85 m |
-| R03 | Traffic lane | Between 2.75 m and 3.75 m |
-| R04 | Parking lane | Between 2.0 m and 2.5 m |
-| R05 | Bus lane | At least 3.0 m |
-| R06 | Buffer | At least 0.75 m between a cycle lane and traffic or parking |
-| R07 | Median | At least 1.0 m |
-| R08 | Planting strip | At least 1.5 m |
-| R09 | Total carriageway | No more than 13.0 m (traffic + bus + parking combined) |
-| R10 | Total street width | No more than 30.0 m recommended |
+| R01 | Sidewalk | ≥ 2.5 m |
+| R02 | Cycle lane | ≥ 1.85 m |
+| R03 | Traffic lane | 2.75 – 3.75 m |
+| R04 | Parking lane | 2.0 – 2.5 m |
+| R05 | Bus lane | ≥ 3.0 m |
+| R06 | Buffer | ≥ 0.75 m between cycle lane and traffic/parking |
+| R07 | Median | ≥ 1.0 m |
+| R08 | Planting strip | ≥ 1.5 m |
+| R09 | Total carriageway | ≤ 13.0 m |
+| R10 | Total street width | ≤ 30.0 m recommended |
 
-Click **Documentation** at the top of the Evaluate tab for the full reference.
+Each rule is independently testable and exposes bilingual messages (DE/EN).
 
 ---
 
-## Explore tab
+## Tech stack
 
-An interactive map of Berlin to help you look at real streets and gather context for your design.
-
-### Map tools
-
-| Tool | What it does |
+| Layer | Choice |
 |---|---|
-| Satellite | Toggle satellite imagery |
-| Mark section | Draw a line on the map to mark where your cross-section is |
-| Measure | Click two points to measure the distance between them |
-| Inspect | Click anywhere on the map to see OpenStreetMap data for that location |
-
-**Inspect** surfaces information like road type, width, surface material, parking layout, cycling infrastructure, sidewalk presence, and more — directly from OpenStreetMap.
-
-### Street-level imagery
-
-After clicking a location on the map, use the **Mapillary** or **Street View** buttons to open street-level photos of that spot. Useful for understanding what a street actually looks like on the ground.
-
-### WFS layers
-
-Load official Berlin geodata layers (Web Feature Service) directly onto the map to overlay planning information on top of the satellite view.
+| Framework | React 18 + TypeScript + Vite |
+| Styling | Tailwind CSS + shadcn/ui (Radix primitives) |
+| Map | Leaflet + OpenStreetMap tiles |
+| LLM inference | Groq API — `llama-3.1-8b-instant` |
+| Street data | OpenStreetMap via Overpass API |
+| Deployment | Vercel (static, CDN edge) |
+| i18n | Custom typed translation registry (DE / EN) |
 
 ---
 
-## Tips
+## Local development
 
-- **Buildings** always sit at the left and right edges of the profile. You can add one on each side.
-- The cross-section **updates live** as you change widths, so you can immediately see the effect of any adjustment.
-- **Custom labels** appear both in the card header and in the exported SVG — helpful for renaming elements to match local terminology, or leaving them blank for a cleaner diagram.
-- To share a design, export it as **JSON** and send the file. The recipient can load it back using the **New street** dropdown.
-- Clicking an element on the cross-section SVG **highlights** the corresponding card in the sidebar — and vice versa.
+```bash
+npm install
+echo "VITE_GROQ_TOKEN=your_key_here" > .env
+npm run dev
+```
+
+The app is fully functional without the Groq token — the AI generation feature is disabled but all other features work.
+
+```bash
+npm run build   # production build
+npm test        # OSM interpreter unit tests
+```
