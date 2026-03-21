@@ -20,6 +20,16 @@ export function TopBar({ lang, onLangChange, docsOpen, onDocsClose, onReplayTour
   return (
     <>
       <div className={TOP_BAR}>
+        {/* Buy Me a Coffee — desktop only (mobile has fixed bottom button) */}
+        <a
+          href="https://www.buymeacoffee.com/streetgenerator"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden lg:flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium rounded bg-[#FFDD00] text-[#000000] hover:bg-[#FFDD00]/80 transition-colors shrink-0"
+        >
+          ☕ Support
+        </a>
+
         <div className={BRAND_SECTION}>
           <span className={BRAND_ICON}>&#x25A3;</span>
           <span className={BRAND_TITLE}>{t("appTitle")}</span>

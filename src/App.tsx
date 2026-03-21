@@ -234,6 +234,16 @@ export default function App() {
           )}
         </div>
       </div>
+      {/* Buy Me a Coffee — mobile only (desktop has TopBar button) */}
+      <a
+        href="https://www.buymeacoffee.com/streetgenerator"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1.5 h-9 px-4 text-sm font-medium rounded-full bg-[#FFDD00] text-[#000000] shadow-lg hover:bg-[#FFDD00]/80 transition-colors"
+      >
+        ☕ Support
+      </a>
+
       {showWelcome && (
         <WelcomeModal lang={lang} onLangChange={setLang} onStart={handleTourStart} onSkip={handleTourSkip} />
       )}

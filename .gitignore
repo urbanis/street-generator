@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+.doc
+docs/plans/notes.md
