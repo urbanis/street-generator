@@ -196,6 +196,7 @@ export default function App() {
               shareCopied={shareCopied}
               onClear={handleClear}
               onAiGenerate={handleAiGenerate}
+              darkMode={darkMode}
             />
           </div>
 

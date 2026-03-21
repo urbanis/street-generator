@@ -39,18 +39,16 @@ export function computeLayout(street: StreetConfig): RenderLayout {
     return result;
   });
 
-  // Human-scale figure heights in meters (used for skyH calculation)
+  // Human-scale figure heights in meters (must match variant IDs in figures/registry.tsx)
   const FIGURE_HEIGHTS_M: Partial<Record<string, number>> = {
-    pedestrian:          1.8,
-    "pedestrian-child":  1.8,
-    "pedestrian-bike":   1.8,
-    "cyclist-upright":   2.0,
-    "cyclist-racing":    2.0,
-    "car-sedan":         1.5,
-    "car-van":           2.4,
-    "car-parallel":      1.5,
-    "car-perpendicular": 1.5,
-    bus:                 3.2,
+    "pedestrian-front":    1.8,
+    "pedestrian-back":     1.8,
+    "pedestrian-senior":   1.8,
+    "pedestrian-kid-back": 1.8,
+    "car-front":           1.25,
+    "car-back":            1.25,
+    "car-perpendicular":   1.25,
+    "car-parallel":        1.25,
   };
 
   const skyH = street.elements.reduce((max, el) => {

@@ -60,11 +60,26 @@ export function TourTooltip({ step, total, lang, onNext, onBack, onExit }: TourT
       const tipH   = tooltipRef.current.offsetHeight;
       const tipW   = tooltipRef.current.offsetWidth;
       const margin = 12;
+
+      // For large targets (>50% viewport), center the tooltip on screen — no arrow
+      const isLargeTarget = rect.width > window.innerWidth * 0.5 || rect.height > window.innerHeight * 0.5;
+      if (isLargeTarget) {
+        setLayout({
+          top:        window.innerHeight / 2 - tipH / 2,
+          left:       window.innerWidth  / 2 - tipW / 2,
+          placement:  "below",
+          targetRect: { x: rect.left, y: rect.top, w: rect.width, h: rect.height },
+          arrowLeft:  -999, // hide arrow
+        });
+        return;
+      }
+
       const spaceBelow  = window.innerHeight - rect.bottom;
       const placement   = spaceBelow > tipH + margin ? "below" : "above";
-      const top = placement === "below"
-        ? rect.bottom + margin
-        : rect.top - tipH - margin;
+      const top = Math.max(
+        8,
+        placement === "below" ? rect.bottom + margin : rect.top - tipH - margin
+      );
       const left = Math.min(
         Math.max(rect.left + rect.width / 2 - tipW / 2, 8),
         window.innerWidth - tipW - 8
@@ -123,7 +138,7 @@ export function TourTooltip({ step, total, lang, onNext, onBack, onExit }: TourT
         className="fixed z-[3000] w-64 bg-[#B22222] text-white rounded-lg p-4 shadow-xl"
       >
         {/* Arrow pointer */}
-        {layout?.targetRect && (
+        {layout?.targetRect && layout.arrowLeft >= 0 && (
           <span
             aria-hidden="true"
             style={{

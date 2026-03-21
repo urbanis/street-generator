@@ -67,9 +67,10 @@ interface CrossSectionViewProps {
   shareCopied:      boolean;
   onClear:          () => void;
   onAiGenerate:     (generated: StreetConfig) => void;
+  darkMode?:        boolean;
 }
 
-export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear, onAiGenerate }: CrossSectionViewProps) {
+export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear, onAiGenerate, darkMode = false }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const t                                      = useT();
   const [zoom, setZoom]                        = useState(1);
@@ -82,6 +83,25 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
   const exportBtnRef                           = useRef<HTMLDivElement>(null);
   const panStartRef                            = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null);
   const { showColor, showLabels: showNames, showMeasure } = theme;
+
+  // SVG color palette — adapts to dark mode
+  const C = darkMode ? {
+    elementFill:    "#1e1e1e",
+    elementStroke:  "#888888",
+    buildingStroke: "#555555",
+    textDark:       "#d1d5db",
+    textMuted:      "#9ca3af",
+    annotationLine: "#555555",
+    separator:      "#555555",
+  } : {
+    elementFill:    "#ffffff",
+    elementStroke:  "#333333",
+    buildingStroke: "#6b7280",
+    textDark:       "#374151",
+    textMuted:      "#6b7280",
+    annotationLine: "#9ca3af",
+    separator:      "#6b7280",
+  };
 
   const layout          = computeLayout(street);
   const W               = layout.totalWidthPx;
@@ -172,11 +192,33 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
     document.body.removeChild(a);
   }
 
+  function lightifyExportSvg(svgEl: SVGSVGElement): string {
+    let s = new XMLSerializer().serializeToString(svgEl);
+    if (darkMode) {
+      // Strip dark-mode figure filter so figures export in original colors
+      s = s.replace(/\s*filter="url\(#fig-dark\)"/g, "");
+      // Replace dark-mode palette colors with light equivalents
+      s = s
+        .replace(/#1e1e1e/gi, "#ffffff")
+        .replace(/#888888/gi, "#333333")
+        .replace(/#555555/gi, "#6b7280")
+        .replace(/#d1d5db/gi, "#374151")
+        .replace(/#9ca3af/gi, "#6b7280");
+    }
+    return s;
+  }
+
   async function exportSvg() {
     if (!svgRef.current) return;
     const svgEl = svgRef.current.cloneNode(true) as SVGSVGElement;
     await inlineImages(svgEl);
-    const blob = new Blob([new XMLSerializer().serializeToString(svgEl)], { type: "image/svg+xml" });
+    // Always export with white background regardless of dark mode
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    bg.setAttribute("x", "0"); bg.setAttribute("y", "0");
+    bg.setAttribute("width", String(W || 400)); bg.setAttribute("height", String(SVG_H));
+    bg.setAttribute("fill", "white");
+    svgEl.insertBefore(bg, svgEl.firstChild);
+    const blob = new Blob([lightifyExportSvg(svgEl)], { type: "image/svg+xml" });
     const url  = URL.createObjectURL(blob);
     triggerDownload(url, `${street.name || "street"}.svg`);
     URL.revokeObjectURL(url);
@@ -243,7 +285,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.scale(SCALE, SCALE);
 
-    const svgBlob = new Blob([new XMLSerializer().serializeToString(svgEl)], { type: "image/svg+xml" });
+    const svgBlob = new Blob([lightifyExportSvg(svgEl)], { type: "image/svg+xml" });
     const imgSrc  = URL.createObjectURL(svgBlob);
     const img     = new Image();
     img.onload = () => {
@@ -410,14 +452,22 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             xmlns="http://www.w3.org/2000/svg"
             className="block"
           >
+            {darkMode && (
+              <defs>
+                {/* Invert colors + reduce alpha: white body→transparent black, black strokes→muted white */}
+                <filter id="fig-dark">
+                  <feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 0.45 0" />
+                </filter>
+              </defs>
+            )}
             {/* Street name + subtitle */}
             {street.name && (
-              <text x={W / 2} y={12} textAnchor="middle" dominantBaseline="middle" fontSize={11} fontWeight="600" fill="#111827">
+              <text x={W / 2} y={12} textAnchor="middle" dominantBaseline="middle" fontSize={11} fontWeight="600" fill={C.textDark}>
                 {street.name}
               </text>
             )}
             {street.subtitle && (
-              <text x={W / 2} y={(street.name ? 18 : 0) + 7} textAnchor="middle" dominantBaseline="middle" fontSize={8} fill="#6b7280">
+              <text x={W / 2} y={(street.name ? 18 : 0) + 7} textAnchor="middle" dominantBaseline="middle" fontSize={8} fill={C.textMuted}>
                 {street.subtitle}
               </text>
             )}
@@ -436,8 +486,8 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                     <rect
                       x={le.x} y={GROUND_Y}
                       width={le.widthPx} height={BAND_H}
-                      fill={showColor ? (def.defaultStyle.fill) : "#ffffff"}
-                      stroke="#6b7280" strokeWidth={0.5}
+                      fill={showColor ? def.defaultStyle.fill : C.elementFill}
+                      stroke={C.buildingStroke} strokeWidth={0.5}
                     />
                     {/* floors rising upward — floor 0 = ground floor = bottom */}
                     {el.building.floors.map((floor, i) => {
@@ -447,14 +497,14 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                           <rect
                             x={le.x} y={floorY}
                             width={le.widthPx} height={floorH}
-                            fill={showColor ? (FLOOR_COLORS[floor.use] ?? "#e5e7eb") : "#ffffff"}
-                            stroke="#6b7280" strokeWidth={0.5}
+                            fill={showColor ? (FLOOR_COLORS[floor.use] ?? "#e5e7eb") : C.elementFill}
+                            stroke={C.buildingStroke} strokeWidth={0.5}
                           />
                           {showNames && floorH > 14 && (
                             <text
                               x={le.x + le.widthPx / 2} y={floorY + floorH / 2}
                               textAnchor="middle" dominantBaseline="middle"
-                              fontSize={Math.min(9, le.widthPx / 6)} fill="#374151"
+                              fontSize={Math.min(9, le.widthPx / 6)} fill={C.textDark}
                               transform={le.widthPx < 50 ? `rotate(-90,${le.x + le.widthPx / 2},${floorY + floorH / 2})` : undefined}
                             >
                               {t((FLOOR_USE_I18N_KEY[floor.use] ?? floor.use) as TranslationKey)}
@@ -469,8 +519,8 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
 
               // Street element — just the ground band
               const mergedStyle = { ...def.defaultStyle, ...el.style };
-              const fill        = showColor ? mergedStyle.fill   : "#ffffff";
-              const stroke      = showColor ? mergedStyle.stroke : "#333333";
+              const fill        = showColor ? mergedStyle.fill   : C.elementFill;
+              const stroke      = showColor ? mergedStyle.stroke : C.elementStroke;
               const bandY       = GROUND_Y + (isRoadLevel(el.type) ? roadOffsetPx : 0);
               const bandH       = isRoadLevel(el.type) ? BAND_H - roadOffsetPx : BAND_H;
               return (
@@ -495,7 +545,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
               const variant = variants.find((v) => v.id === el.figure!.variant) ?? variants[0];
               if (!variant) return null;
               return (
-                <g key={`fig-${le.id}`}>
+                <g key={`fig-${le.id}`} filter={darkMode ? "url(#fig-dark)" : undefined}>
                   {variant.renderSVG({
                     cx:       le.x + le.widthPx / 2,
                     groundY:  GROUND_Y + (isRoadLevel(el.type) ? roadOffsetPx : 0),
@@ -538,13 +588,13 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                       <g key={`ann-${el.id}`}>
                         {/* Dimension lines — only when measures are visible */}
                         {showMeasure && (<>
-                          <line x1={le.x}              y1={elBandBottom} x2={le.x}              y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
-                          <line x1={le.x + le.widthPx} y1={elBandBottom} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
-                          <line x1={le.x} y1={dimLineY} x2={le.x + le.widthPx} y2={dimLineY} stroke="#9ca3af" strokeWidth={0.5} />
+                          <line x1={le.x}              y1={elBandBottom} x2={le.x}              y2={dimLineY} stroke={C.annotationLine} strokeWidth={0.5} />
+                          <line x1={le.x + le.widthPx} y1={elBandBottom} x2={le.x + le.widthPx} y2={dimLineY} stroke={C.annotationLine} strokeWidth={0.5} />
+                          <line x1={le.x} y1={dimLineY} x2={le.x + le.widthPx} y2={dimLineY} stroke={C.annotationLine} strokeWidth={0.5} />
                         </>)}
                         {/* Measurement — above dim line */}
                         {!tooNarrow && showMeasure && (
-                          <text x={cx} y={dimLineY - 3} textAnchor="middle" dominantBaseline="auto" fontSize={8} fill="#6b7280">
+                          <text x={cx} y={dimLineY - 3} textAnchor="middle" dominantBaseline="auto" fontSize={8} fill={C.textMuted}>
                             {el.width_m.toFixed(2)} m
                           </text>
                         )}
@@ -555,7 +605,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                           const lineH    = fontSize + 2;
                           const lines    = wrapLabel(label, le.widthPx - 4, fontSize);
                           return (
-                            <text x={cx} y={labelY} textAnchor="middle" dominantBaseline="hanging" fontSize={fontSize} fill="#374151">
+                            <text x={cx} y={labelY} textAnchor="middle" dominantBaseline="hanging" fontSize={fontSize} fill={C.textDark}>
                               {lines.map((line, i) => (
                                 <tspan key={i} x={cx} dy={i === 0 ? 0 : lineH}>{line}</tspan>
                               ))}
@@ -569,10 +619,10 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                   {/* Total street width dimension line */}
                   {showMeasure && streetEls.length > 0 && (
                     <g>
-                      <line x1={totalX1} y1={totalLineY} x2={totalX2} y2={totalLineY} stroke="#6b7280" strokeWidth={0.5} />
-                      <line x1={totalX1} y1={totalLineY - 5} x2={totalX1} y2={totalLineY + 5} stroke="#6b7280" strokeWidth={0.5} />
-                      <line x1={totalX2} y1={totalLineY - 5} x2={totalX2} y2={totalLineY + 5} stroke="#6b7280" strokeWidth={0.5} />
-                      <text x={(totalX1 + totalX2) / 2} y={totalLineY - 3} textAnchor="middle" dominantBaseline="auto" fontSize={8} fill="#6b7280">
+                      <line x1={totalX1} y1={totalLineY} x2={totalX2} y2={totalLineY} stroke={C.separator} strokeWidth={0.5} />
+                      <line x1={totalX1} y1={totalLineY - 5} x2={totalX1} y2={totalLineY + 5} stroke={C.separator} strokeWidth={0.5} />
+                      <line x1={totalX2} y1={totalLineY - 5} x2={totalX2} y2={totalLineY + 5} stroke={C.separator} strokeWidth={0.5} />
+                      <text x={(totalX1 + totalX2) / 2} y={totalLineY - 3} textAnchor="middle" dominantBaseline="auto" fontSize={8} fill={C.textMuted}>
                         {totalWidth_m.toFixed(2)} m
                       </text>
                     </g>
@@ -590,7 +640,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                   key={`sep-${le.id}`}
                   x1={le.x} y1={bandY}
                   x2={le.x} y2={bandY + BAND_H}
-                  stroke="#6b7280" strokeWidth={0.5}
+                  stroke={C.separator} strokeWidth={0.5}
                 />
               );
             })}
