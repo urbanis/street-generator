@@ -6,10 +6,10 @@ import { getDefaultFigureVariant } from "../../figures/registry";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
-const AI_USED_KEY = "berlin-street-designer-ai-used";
-const HF_TOKEN    = import.meta.env.VITE_HF_TOKEN ?? "";
-if (import.meta.env.DEV && !HF_TOKEN) {
-  console.warn("[AIModal] VITE_HF_TOKEN is not set — API calls will return 401.");
+const AI_USED_KEY  = "berlin-street-designer-ai-used";
+const GROQ_TOKEN   = import.meta.env.VITE_GROQ_TOKEN ?? "";
+if (import.meta.env.DEV && !GROQ_TOKEN) {
+  console.warn("[AIModal] VITE_GROQ_TOKEN is not set — API calls will return 401.");
 }
 const VALID_TYPES = new Set<ElementType>([
   "SIDEWALK","CYCLE_LANE","CYCLE_LANE_ROAD","BUFFER","PARKING_LANE",
@@ -57,33 +57,37 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
     setLoading(true);
     setError(null);
     try {
-      const formattedPrompt =
-        `<|im_start|>system\n${SYSTEM_PROMPT}<|im_end|>\n` +
-        `<|im_start|>user\n${prompt.trim()}<|im_end|>\n` +
-        `<|im_start|>assistant\n`;
-
       const res = await fetch(
-        "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct",
+        "https://api.groq.com/openai/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${HF_TOKEN}`,
+            "Authorization": `Bearer ${GROQ_TOKEN}`,
           },
           body: JSON.stringify({
-            inputs: formattedPrompt,
-            parameters: { max_new_tokens: 800, temperature: 0.3, return_full_text: false },
+            model: "llama-3.1-8b-instant",
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              { role: "user",   content: prompt.trim() },
+            ],
+            max_tokens: 800,
+            temperature: 0.3,
           }),
         }
       );
       if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
-      const raw  = Array.isArray(data) ? (data[0]?.generated_text ?? "") : "";
+      console.log("[AIModal] data:", JSON.stringify(data).slice(0, 500));
+      const raw  = data.choices?.[0]?.message?.content ?? "";
+      console.log("[AIModal] raw content:", raw.slice(0, 300));
 
       // Extract JSON from response (strip any accidental markdown)
       const jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("No JSON in response");
+      console.log("[AIModal] jsonMatch:", jsonMatch[0].slice(0, 300));
       const parsed = JSON.parse(jsonMatch[0]) as { name?: string; elements?: { type: string; width_m: number }[] };
+      console.log("[AIModal] parsed elements:", parsed.elements?.length, parsed.elements?.map(e => e.type));
 
       const elements: StreetElement[] = (parsed.elements ?? [])
         .filter((e) => VALID_TYPES.has(e.type as ElementType))
@@ -114,8 +118,9 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
       setAlreadyUsed(true);
       onGenerate(street);
     } catch (e) {
-      console.error(e);
-      setError(lang === "de" ? "Fehler beim Generieren. Bitte versuche es erneut." : "Generation failed. Please try again.");
+      console.error("[AIModal] caught:", e);
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(msg || (lang === "de" ? "Fehler beim Generieren." : "Generation failed."));
     } finally {
       setLoading(false);
     }
