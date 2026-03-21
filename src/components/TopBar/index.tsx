@@ -56,10 +56,21 @@ export function TopBar({ lang, onLangChange, docsOpen, onDocsClose, onReplayTour
             </button>
             <h2 className="text-sm font-semibold mb-3">{t("documentation")}</h2>
             <div className="text-xs text-muted-foreground space-y-2">
-              <p><strong className="text-foreground">Erkunden</strong> — Suche nach einer Straße in Berlin und generiere einen Querschnitt aus OSM-Daten.</p>
-              <p><strong className="text-foreground">Entwerfen</strong> — Füge Elemente hinzu, ändere Breiten und ordne sie per Drag & Drop neu an.</p>
-              <p><strong className="text-foreground">Bewerten</strong> — Prüft den Entwurf anhand der Berliner Planungsrichtlinien (RASt 06).</p>
-              <p className="pt-1 border-t border-border">Regeln R01–R10 basieren auf der Richtlinie für die Anlage von Stadtstraßen (RASt 06).</p>
+              {lang === "de" ? (
+                <>
+                  <p><strong className="text-foreground">Erkunden</strong> — Suche nach einer Straße in Berlin und generiere einen Querschnitt aus OSM-Daten.</p>
+                  <p><strong className="text-foreground">Entwerfen</strong> — Füge Elemente hinzu, ändere Breiten und ordne sie per Drag & Drop neu an.</p>
+                  <p><strong className="text-foreground">Bewerten</strong> — Prüft den Entwurf anhand der Berliner Planungsrichtlinien (RASt 06).</p>
+                  <p className="pt-1 border-t border-border">Regeln R01–R10 basieren auf der Richtlinie für die Anlage von Stadtstraßen (RASt 06).</p>
+                </>
+              ) : (
+                <>
+                  <p><strong className="text-foreground">Explore</strong> — Search for a street in Berlin and generate a cross-section from OSM data.</p>
+                  <p><strong className="text-foreground">Design</strong> — Add elements, change widths, and reorder them via drag & drop.</p>
+                  <p><strong className="text-foreground">Evaluate</strong> — Checks the design against Berlin planning guidelines (RASt 06).</p>
+                  <p className="pt-1 border-t border-border">Rules R01–R10 are based on the Guidelines for Urban Street Design (RASt 06).</p>
+                </>
+              )}
             </div>
           </div>
         </div>

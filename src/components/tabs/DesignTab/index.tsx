@@ -123,7 +123,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
       </div>
 
       <div className="flex flex-col gap-1 border-b border-border pb-2">
-        <Label className="text-xs text-muted-foreground">{lang === "de" ? "Vorlage" : "Template"}</Label>
+        <Label className="text-xs text-muted-foreground">{t("template")}</Label>
         <select
           className="h-7 w-full rounded border border-input bg-background px-1.5 text-xs text-foreground"
           defaultValue=""
@@ -133,7 +133,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
             e.target.value = "";
           }}
         >
-          <option value="" disabled>{lang === "de" ? "Vorlage auswählen…" : "Select a template…"}</option>
+          <option value="" disabled>{t("templatePlaceholder")}</option>
           {templates.filter((tpl) => tpl.id !== "empty").map((tpl) => (
             <option key={tpl.id} value={tpl.id}>{tpl.label[lang]}</option>
           ))}
@@ -150,7 +150,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
 
       {street.elements.length > 0 && (
         <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">{street.elements.length} {lang === "de" ? "Elemente" : "elements"}</span>
+          <span className="text-xs text-muted-foreground">{street.elements.length} {t("elements")}</span>
           <Button
             variant="ghost"
             size="sm"
@@ -158,9 +158,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
             onClick={() => setAllOpen((v) => v !== true)}
           >
             <ChevronsUpDown size={11} />
-            {allOpen === true
-              ? (lang === "de" ? "Alle schließen" : "Collapse all")
-              : (lang === "de" ? "Alle öffnen"    : "Expand all")}
+            {allOpen === true ? t("collapseAll") : t("expandAll")}
           </Button>
         </div>
       )}

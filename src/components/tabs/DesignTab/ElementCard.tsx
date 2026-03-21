@@ -98,12 +98,12 @@ export function ElementCard({
         {/* Type label — editable Select for non-buildings, plain text for buildings */}
         {isBuilding ? (
           <span className="flex-1 min-w-0 text-xs font-medium truncate">
-            {element.label || def.label[lang]}
+            {def.label[lang]}
           </span>
         ) : (
-          <Select value={element.type} onValueChange={(v) => onChange({ ...element, type: v as ElementType })}>
+          <Select key={lang} value={element.type} onValueChange={(v) => onChange({ ...element, type: v as ElementType })}>
             <SelectTrigger className="flex-1 min-w-0 h-auto py-0 border-0 bg-transparent shadow-none text-xs font-medium focus:ring-0 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:shrink-0">
-              <SelectValue>{element.label || def.label[lang]}</SelectValue>
+              <SelectValue placeholder={def.label[lang]} />
             </SelectTrigger>
             <SelectContent>
               {REGISTRY.filter((d) => d.type !== "BUILDING_LEFT" && d.type !== "BUILDING_RIGHT").map((d) => (
@@ -152,7 +152,7 @@ export function ElementCard({
           <Input
             type="text"
             className="h-7 text-xs"
-            placeholder={def.label[lang]}
+            placeholder={t("customLabel")}
             value={element.label ?? ""}
             onChange={(e) => onChange({ ...element, label: e.target.value || undefined })}
           />
@@ -192,7 +192,7 @@ export function ElementCard({
           {!isBuilding && (
             <div className="flex items-center gap-2">
               <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                Fill
+                {t("colorFill")}
                 <input
                   type="color"
                   className="h-5 w-8 cursor-pointer rounded border-none p-0"
@@ -201,7 +201,7 @@ export function ElementCard({
                 />
               </label>
               <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                Stroke
+                {t("colorStroke")}
                 <input
                   type="color"
                   className="h-5 w-8 cursor-pointer rounded border-none p-0"

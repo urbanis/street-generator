@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useLang } from "../../i18n";
+import { useLang, useT } from "../../i18n";
+import type { TranslationKey } from "../../i18n";
 import type { StreetConfig } from "../../models/street";
 import { getElementDef } from "../../elements/registry";
 import { computeLayout, BAND_H, ANN_H, ROAD_OFFSET_M } from "./renderer";
@@ -27,6 +28,13 @@ const FLOOR_COLORS: Record<string, string> = {
   Gewerbe:    "#E4B8B4",
   Gemischt:   "#E4CDB0",
   Öffentlich: "#D8D9D5",
+};
+
+const FLOOR_USE_I18N_KEY: Record<string, string> = {
+  Wohnen:     "floorUseWohnen",
+  Gewerbe:    "floorUseGewerbe",
+  Gemischt:   "floorUseGemischt",
+  Öffentlich: "floorUseOffentlich",
 };
 
 function wrapLabel(text: string, maxWidthPx: number, fontSize: number): string[] {
@@ -63,6 +71,7 @@ interface CrossSectionViewProps {
 
 export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear, onAiGenerate }: CrossSectionViewProps) {
   const lang                                   = useLang();
+  const t                                      = useT();
   const [zoom, setZoom]                        = useState(1);
   const [isPanning, setIsPanning]              = useState(false);
   const [aiModalOpen, setAiModalOpen]          = useState(false);
@@ -252,7 +261,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
       <div className={CSV_HEADER}>
         <div className={CSV_CONTROLS}>
           {/* Trash — far left */}
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 text-muted-foreground hover:text-destructive" onClick={onClear} title={lang === "de" ? "Zeichnung löschen" : "Clear drawing"} aria-label={lang === "de" ? "Zeichnung löschen" : "Clear drawing"}>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0 text-muted-foreground hover:text-destructive" onClick={onClear} title={t("clearDrawing")} aria-label={t("clearDrawing")}>
             <Trash2 size={14} />
           </Button>
 
@@ -263,7 +272,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
               size="sm"
               className={cn("h-7 w-7 p-0", theme.showColor && "bg-accent text-accent-foreground")}
               onClick={() => onThemeChange({ ...theme, showColor: !theme.showColor })}
-              title={lang === "de" ? "Farbe" : "Color"}
+              title={t("themeColor")}
               aria-pressed={theme.showColor}
             >
               <Palette size={12} />
@@ -273,7 +282,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
               size="sm"
               className={cn("h-7 w-7 p-0", theme.showLabels && "bg-accent text-accent-foreground")}
               onClick={() => onThemeChange({ ...theme, showLabels: !theme.showLabels })}
-              title={lang === "de" ? "Labels" : "Labels"}
+              title={t("themeLabels")}
               aria-pressed={theme.showLabels}
             >
               <Type size={12} />
@@ -283,7 +292,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
               size="sm"
               className={cn("h-7 w-7 p-0", theme.showMeasure && "bg-accent text-accent-foreground")}
               onClick={() => onThemeChange({ ...theme, showMeasure: !theme.showMeasure })}
-              title={lang === "de" ? "Maße" : "Measures"}
+              title={t("themeMeasures")}
               aria-pressed={theme.showMeasure}
             >
               <Ruler size={12} />
@@ -293,7 +302,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
               size="sm"
               className={cn("h-7 w-7 p-0", showAllFigures && "bg-accent text-accent-foreground")}
               onClick={() => onShowAllFiguresChange(!showAllFigures)}
-              title={lang === "de" ? "Figuren" : "Figures"}
+              title={t("figures")}
               aria-pressed={showAllFigures}
             >
               <PersonStanding size={12} />
@@ -306,8 +315,8 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             size="sm"
             className="h-7 w-7 p-0 shrink-0"
             onClick={() => setAiModalOpen(true)}
-            title={lang === "de" ? "Straße generieren" : "Generate street"}
-            aria-label={lang === "de" ? "Straße generieren" : "Generate street"}
+            title={t("generateStreet")}
+            aria-label={t("generateStreet")}
           >
             <Sparkles size={12} />
           </Button>
@@ -317,21 +326,21 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
 
           {/* Zoom controls — center */}
           <div className="flex items-center gap-0.5 border border-border rounded shrink-0">
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title="Zoom in"><ZoomIn size={12} /></Button>
-            <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title="Fit"><Maximize2 size={11} /></Button>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title="Zoom out"><ZoomOut size={12} /></Button>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.min(z * 1.25, 5))} title={lang === "de" ? "Vergrößern" : "Zoom in"}><ZoomIn size={12} /></Button>
+            <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs" onClick={fit} title={t("fitMap")}><Maximize2 size={11} /></Button>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(z * 0.8, 0.1))} title={lang === "de" ? "Verkleinern" : "Zoom out"}><ZoomOut size={12} /></Button>
           </div>
 
           {/* Right group — import, share, download */}
           <div className="flex-1 flex items-center justify-end gap-1">
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={handleImport} title={lang === "de" ? "JSON importieren" : "Import JSON"} aria-label={lang === "de" ? "JSON importieren" : "Import JSON"}>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={handleImport} title={t("importJson")} aria-label={t("importJson")}>
               <FileUp size={14} />
             </Button>
-            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? (lang === "de" ? "Kopiert!" : "Copied!") : (lang === "de" ? "Teilen" : "Share")} aria-label={lang === "de" ? "Teilen" : "Share"}>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" onClick={onShare} title={shareCopied ? t("copied") : t("share")} aria-label={t("share")}>
               {shareCopied ? <Check size={14} className="text-green-600" /> : <Share2 size={14} />}
             </Button>
             {/* Export — Download icon button with invisible select overlay for native picker */}
-            <div className="relative shrink-0" data-tour="export-btn" title={lang === "de" ? "Exportieren" : "Export"}>
+            <div className="relative shrink-0" data-tour="export-btn" title={t("exportLabel")}>
               <Button variant="ghost" size="sm" className="h-7 w-7 p-0 pointer-events-none" tabIndex={-1} aria-hidden>
                 <FileDown size={14} />
               </Button>
@@ -346,7 +355,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                   else if (fmt === "json") exportJson();
                 }}
               >
-                <option value="" disabled>{lang === "de" ? "Exportieren" : "Export"}</option>
+                <option value="" disabled>{t("exportLabel")}</option>
                 <option value="png">PNG</option>
                 <option value="svg">SVG</option>
                 <option value="json">JSON</option>
@@ -368,7 +377,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
       >
         {W === 0 ? (
           <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
-            {lang === "de" ? "Keine Elemente. Palette unten verwenden." : "No elements. Use the palette below."}
+            {t("noElements")}
           </div>
         ) : (
           <svg
@@ -426,7 +435,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                               fontSize={Math.min(9, le.widthPx / 6)} fill="#374151"
                               transform={le.widthPx < 50 ? `rotate(-90,${le.x + le.widthPx / 2},${floorY + floorH / 2})` : undefined}
                             >
-                              {floor.use}
+                              {t((FLOOR_USE_I18N_KEY[floor.use] ?? floor.use) as TranslationKey)}
                             </text>
                           )}
                         </g>
