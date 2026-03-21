@@ -30,7 +30,7 @@ export function WelcomeModal({ lang, onLangChange, onStart, onSkip }: WelcomeMod
       <div className="flex flex-col items-center gap-6 text-white text-center px-8 max-w-sm">
         <span className="text-5xl">🗺️</span>
         <div className="flex flex-col gap-2">
-          <h1 id="welcome-modal-title" className="text-2xl font-bold tracking-tight">StraßenLabor</h1>
+          <h1 id="welcome-modal-title" className="text-2xl font-bold tracking-tight">Street Generator</h1>
           <p className="text-sm text-white/80">
             {lang === "de"
               ? <>Gestalte Querschnitte von Berliner Straßen (oder anderswo).<br />Skizziere, bewerte und exportiere in Sekunden.</>

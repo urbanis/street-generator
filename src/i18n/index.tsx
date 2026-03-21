@@ -4,7 +4,7 @@ export type Lang = "de" | "en";
 
 const TRANSLATIONS = {
   de: {
-    appTitle: "StraßenLabor",
+    appTitle: "Street Generator",
     version: "v0.1",
     // Tabs
     tabExplore: "Erkunden",
@@ -113,7 +113,7 @@ const TRANSLATIONS = {
     copied:              "Kopiert!",
   },
   en: {
-    appTitle: "StraßenLabor",
+    appTitle: "Street Generator",
     version: "v0.1",
     tabExplore: "Explore",
     tabDesign: "Design",
