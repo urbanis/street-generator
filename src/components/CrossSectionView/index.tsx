@@ -472,11 +472,12 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
               const fill        = showColor ? mergedStyle.fill   : "#ffffff";
               const stroke      = showColor ? mergedStyle.stroke : "#333333";
               const bandY       = GROUND_Y + (isRoadLevel(el.type) ? roadOffsetPx : 0);
+              const bandH       = isRoadLevel(el.type) ? BAND_H - roadOffsetPx : BAND_H;
               return (
                 <g key={el.id}>
                   <rect
                     x={le.x} y={bandY}
-                    width={le.widthPx} height={BAND_H}
+                    width={le.widthPx} height={bandH}
                     fill={fill} stroke={stroke} strokeWidth={0.5}
                   />
 
