@@ -504,7 +504,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
                             <text
                               x={le.x + le.widthPx / 2} y={floorY + floorH / 2}
                               textAnchor="middle" dominantBaseline="middle"
-                              fontSize={Math.min(9, le.widthPx / 6)} fill={C.textDark}
+                              fontSize={Math.min(9, le.widthPx / 6)} fill={showColor ? "#374151" : C.textDark}
                               transform={le.widthPx < 50 ? `rotate(-90,${le.x + le.widthPx / 2},${floorY + floorH / 2})` : undefined}
                             >
                               {t((FLOOR_USE_I18N_KEY[floor.use] ?? floor.use) as TranslationKey)}
