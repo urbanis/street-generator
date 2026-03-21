@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import type { Lang } from "../../i18n";
+import { capture } from "../../lib/analytics";
 
 export interface TourStep {
   target: string;
@@ -157,7 +158,7 @@ export function TourTooltip({ step, total, lang, onNext, onBack, onExit }: TourT
         )}
 
         <button
-          onClick={onExit}
+          onClick={() => { capture("tour_skipped", { at_step: step }); onExit(); }}
           className="absolute top-2 right-2 text-white/60 hover:text-white"
           aria-label="Close tour"
         >
@@ -186,7 +187,7 @@ export function TourTooltip({ step, total, lang, onNext, onBack, onExit }: TourT
             <span className="text-xs text-white/60">{step + 1}/{total}</span>
           </div>
           <button
-            onClick={onNext}
+            onClick={() => { if (isLast) capture("tour_completed"); onNext(); }}
             aria-label={isLast ? "Finish tour" : `Next, step ${step + 2} of ${total}`}
             className="text-xs font-semibold bg-white text-[#B22222] px-3 py-1 rounded hover:bg-white/90 transition-colors"
           >

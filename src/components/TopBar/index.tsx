@@ -1,6 +1,7 @@
 import { useT } from "../../i18n";
 import type { Lang } from "../../i18n";
 import { X, HelpCircle, Sun, Moon, Heart } from "lucide-react";
+import { capture } from "../../lib/analytics";
 import {
   TOP_BAR, BRAND_SECTION, BRAND_ICON, BRAND_TITLE, BRAND_VERSION,
   TOOLBAR_SECTION, LANG_INACTIVE,
@@ -28,6 +29,7 @@ export function TopBar({ lang, onLangChange, darkMode, onDarkModeToggle, docsOpe
           target="_blank"
           rel="noopener noreferrer"
           className="hidden lg:flex items-center gap-1.5 h-7 px-2.5 text-xs font-medium rounded bg-primary text-primary-foreground hover:bg-primary/80 transition-colors shrink-0"
+          onClick={() => capture("support_button_clicked")}
         >
           <Heart size={12} /> Support
         </a>
@@ -42,14 +44,14 @@ export function TopBar({ lang, onLangChange, darkMode, onDarkModeToggle, docsOpe
           <select
             className="h-7 px-1.5 text-xs text-muted-foreground bg-background border border-border rounded cursor-pointer"
             value={lang}
-            onChange={(e) => onLangChange(e.target.value as "de" | "en")}
+            onChange={(e) => { capture("language_switched", { to: e.target.value }); onLangChange(e.target.value as "de" | "en"); }}
             aria-label="Language"
           >
             <option value="de">DE</option>
             <option value="en">EN</option>
           </select>
           <button
-            onClick={onDarkModeToggle}
+            onClick={() => { capture("dark_mode_toggled", { enabled: !darkMode }); onDarkModeToggle(); }}
             className={LANG_INACTIVE}
             title={darkMode ? (lang === "de" ? "Heller Modus" : "Light mode") : (lang === "de" ? "Dunkler Modus" : "Dark mode")}
             aria-label={darkMode ? "Light mode" : "Dark mode"}

@@ -15,6 +15,7 @@ import {
   EXPLORE_TAB, SEARCH_INPUT, MODE_BUTTON_ACTIVE, MODE_BUTTON_INACTIVE, ERROR_BOX,
   TOOL_CARD_ACTIVE, TOOL_CARD_INACTIVE, TOOL_ICON_WRAP,
 } from "./styles";
+import { capture } from "../../../lib/analytics";
 
 interface ExploreTabProps {
   mapReference:          MapReference | null;
@@ -210,6 +211,7 @@ export function ExploreTab({
   function toggleMode(mode: MapMode) {
     onShowMap();
     const next = mapMode === mode ? "none" : mode;
+    if (next !== "none") capture("tool_activated", { tool: next });
     onMapModeChange(next);
     if (next !== "mark-section") { setSectionPoints([]); onSectionLineChange(undefined); }
     if (next !== "measure")      { measurePtsRef.current = []; onMeasurePointsChange(undefined); setMeasureDist(0); }

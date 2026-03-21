@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AlertTriangle, X, ChevronsUpDown } from "lucide-react";
+import { capture } from "../../../lib/analytics";
 import type { StreetConfig, StreetElement, ElementType } from "../../../models/street";
 import { useT, useLang } from "../../../i18n";
 import { getElementDef } from "../../../elements/registry";
@@ -129,7 +130,7 @@ export function DesignTab({ street, onStreetChange, highlightedIds, osmDisclaime
           defaultValue=""
           onChange={(e) => {
             const tpl = templates.find((t) => t.id === e.target.value);
-            if (tpl) onTemplateApply(tpl);
+            if (tpl) { capture("template_applied", { template_id: tpl.id }); onTemplateApply(tpl); }
             e.target.value = "";
           }}
         >

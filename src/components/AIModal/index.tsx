@@ -1,6 +1,7 @@
 // src/components/AIModal/index.tsx
 import { useState } from "react";
 import type { StreetConfig, StreetElement, ElementType } from "../../models/street";
+import { capture } from "../../lib/analytics";
 import { getElementDef } from "../../elements/registry";
 import { getDefaultFigureVariant } from "../../figures/registry";
 import { Button } from "@/components/ui/button";
@@ -114,12 +115,14 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
         elements,
       };
 
+      capture("ai_generated", { success: true });
       localStorage.setItem(AI_USED_KEY, "1");
       setAlreadyUsed(true);
       onGenerate(street);
     } catch (e) {
       console.error("[AIModal] caught:", e);
       const msg = e instanceof Error ? e.message : String(e);
+      capture("ai_generated", { success: false, error: msg });
       setError(msg || (lang === "de" ? "Fehler beim Generieren." : "Generation failed."));
     } finally {
       setLoading(false);

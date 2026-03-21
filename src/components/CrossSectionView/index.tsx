@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2, Palette, Type, Ruler, PersonStanding, Sparkles } from "lucide-react";
 import { AIModal } from "../AIModal";
+import { capture } from "../../lib/analytics";
 
 export interface ThemeFlags {
   showColor:   boolean;
@@ -222,6 +223,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
     const url  = URL.createObjectURL(blob);
     triggerDownload(url, `${street.name || "street"}.svg`);
     URL.revokeObjectURL(url);
+    capture("export", { format: "svg" });
   }
 
   function exportJson() {
@@ -229,6 +231,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
     const url  = URL.createObjectURL(blob);
     triggerDownload(url, `${street.name || "street"}.json`);
     URL.revokeObjectURL(url);
+    capture("export", { format: "json" });
   }
 
   async function exportPng() {
@@ -296,6 +299,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
         const url = URL.createObjectURL(blob);
         triggerDownload(url, `${street.name || "street"}.png`);
         URL.revokeObjectURL(url);
+        capture("export", { format: "png" });
       }, "image/png");
     };
     img.src = imgSrc;

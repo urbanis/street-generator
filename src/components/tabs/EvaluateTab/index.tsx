@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { useLang } from "../../../i18n";
+import { capture } from "../../../lib/analytics";
 import type { ValidationResultItem } from "../../../rules/types";
 import {
   EVALUATE_TAB, RULE_ITEM, RULE_PASS, RULE_WARN, RULE_FAIL,
@@ -20,7 +21,7 @@ export function EvaluateTab({ results, onOpenDocs }: EvaluateTabProps) {
   const docsButton = (
     <button
       className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground w-full border border-border rounded px-2 py-1.5 mb-1"
-      onClick={onOpenDocs}
+      onClick={() => { capture("documentation_opened"); onOpenDocs(); }}
     >
       <BookOpen size={12} />
       {lang === "de" ? "Dokumentation" : "Documentation"}
