@@ -2,6 +2,7 @@ import { useT } from "../../i18n";
 import type { Lang } from "../../i18n";
 import { X, HelpCircle, Sun, Moon, Heart } from "lucide-react";
 import { capture } from "../../lib/analytics";
+import { PrivacyModal } from "../PrivacyModal";
 import {
   TOP_BAR, BRAND_SECTION, BRAND_ICON, BRAND_TITLE, BRAND_VERSION,
   TOOLBAR_SECTION, LANG_INACTIVE,
@@ -66,6 +67,7 @@ export function TopBar({ lang, onLangChange, darkMode, onDarkModeToggle, docsOpe
           >
             <HelpCircle size={14} />
           </button>
+          <PrivacyModal lang={lang} />
         </div>
       </div>
 

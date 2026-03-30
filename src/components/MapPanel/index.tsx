@@ -97,8 +97,9 @@ function WfsGeoJsonLayer({ layer }: { layer: WfsLayer }) {
       style={{ color: "#6366f1", weight: 1, fillOpacity: 0.25 }}
       onEachFeature={(feature, leafletLayer) => {
         if (!feature.properties) return;
+        const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         const rows = Object.entries(feature.properties)
-          .map(([k, v]) => `<tr><td style="padding:1px 6px 1px 0;font-weight:600;white-space:nowrap">${k}</td><td>${v ?? ""}</td></tr>`)
+          .map(([k, v]) => `<tr><td style="padding:1px 6px 1px 0;font-weight:600;white-space:nowrap">${esc(String(k))}</td><td>${esc(String(v ?? ""))}</td></tr>`)
           .join("");
         leafletLayer.bindPopup(`<table style="font-size:12px;border-collapse:collapse">${rows}</table>`, { maxHeight: 240 });
       }}

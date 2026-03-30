@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2, Palette, Type, Ruler, PersonStanding, Sparkles } from "lucide-react";
 import { AIModal } from "../AIModal";
 import { capture } from "../../lib/analytics";
+import { sanitizeStreet } from "../../persistence";
 
 export interface ThemeFlags {
   showColor:   boolean;
@@ -132,7 +133,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
       const reader = new FileReader();
       reader.onload = () => {
         try {
-          const s = JSON.parse(reader.result as string) as StreetConfig;
+          const s = sanitizeStreet(JSON.parse(reader.result as string));
           onStreetImport(s);
         } catch { alert("Invalid JSON file"); }
       };
