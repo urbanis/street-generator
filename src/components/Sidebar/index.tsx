@@ -56,7 +56,7 @@ export function Sidebar({
   return (
     <div className={SIDEBAR}>
       <div className={TAB_BAR}>
-        {(["explore", "design", "evaluate"] as Tab[]).map((tab) => (
+        {(["explore", "design" /*, "evaluate" */] as Tab[]).map((tab) => (
           <button
             key={tab}
             className={activeTab === tab ? TAB_BUTTON_ACTIVE : TAB_BUTTON_INACTIVE}
@@ -104,9 +104,9 @@ export function Sidebar({
           onTemplateApply={onTemplateApply}
         />
       </div>
-      <div className={`${TAB_CONTENT} ${activeTab === "evaluate" ? "" : "hidden"}`}>
+      {/* <div className={`${TAB_CONTENT} ${activeTab === "evaluate" ? "" : "hidden"}`}>
         <EvaluateTab results={results} onOpenDocs={onOpenDocs} />
-      </div>
+      </div> */}
     </div>
   );
 }
