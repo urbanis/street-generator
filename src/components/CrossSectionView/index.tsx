@@ -9,7 +9,7 @@ import { CROSS_SECTION_VIEW, CSV_HEADER, CSV_CONTROLS, CSV_SVG_WRAP } from "./st
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, Maximize2, FileDown, FileUp, Share2, Check, Trash2, Palette, Type, Ruler, PersonStanding, Sparkles } from "lucide-react";
-import { AIModal } from "../AIModal";
+
 import { capture } from "../../lib/analytics";
 import { sanitizeStreet } from "../../persistence";
 
@@ -68,16 +68,15 @@ interface CrossSectionViewProps {
   onShare:          () => void;
   shareCopied:      boolean;
   onClear:          () => void;
-  onAiGenerate:     (generated: StreetConfig) => void;
+  onAiOpen:         () => void;
   darkMode?:        boolean;
 }
 
-export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear, onAiGenerate, darkMode = false }: CrossSectionViewProps) {
+export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChange, theme, onThemeChange, onStreetImport, onShare, shareCopied, onClear, onAiOpen, darkMode = false }: CrossSectionViewProps) {
   const lang                                   = useLang();
   const t                                      = useT();
   const [zoom, setZoom]                        = useState(1);
   const [isPanning, setIsPanning]              = useState(false);
-  const [aiModalOpen, setAiModalOpen]          = useState(false);
   const [exportOpen, setExportOpen]            = useState(false);
   const [exportPos, setExportPos]              = useState<{ top: number; right: number } | null>(null);
   const svgRef                                 = useRef<SVGSVGElement>(null);
@@ -364,7 +363,7 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
             variant="ghost"
             size="sm"
             className="h-9 w-9 md:h-7 md:w-7 p-0 shrink-0"
-            onClick={() => setAiModalOpen(true)}
+            onClick={() => onAiOpen()}
             title={t("generateStreet")}
             aria-label={t("generateStreet")}
           >
@@ -652,13 +651,6 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
           </svg>
         )}
       </div>
-      {aiModalOpen && (
-        <AIModal
-          lang={lang}
-          onGenerate={(s) => { onAiGenerate(s); setAiModalOpen(false); }}
-          onClose={() => setAiModalOpen(false)}
-        />
-      )}
     </div>
   );
 }

@@ -85,62 +85,75 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-background rounded-lg shadow-xl w-full max-w-md mx-4 p-5 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between">
+    <>
+      {/* Side panel */}
+      <div
+        className="h-full bg-background border-l border-border flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h2 className="text-sm font-semibold">
-            {lang === "de" ? "Straße aus Beschreibung generieren" : "Generate street from description"}
+            {lang === "de" ? "KI-Straßengenerator" : "AI Street Generator"}
           </h2>
           <button onClick={onClose} aria-label={lang === "de" ? "Schließen" : "Close"} className="text-muted-foreground hover:text-foreground">
             <X size={14} />
           </button>
         </div>
 
-        {alreadyUsed ? (
-          <p className="text-xs text-muted-foreground">
-            {lang === "de"
-              ? "Du hast deine kostenlose Generierung bereits verwendet."
-              : "You've already used your free generation."}
-          </p>
-        ) : (
-          <>
-            <textarea
-              className="w-full rounded border border-input bg-background px-3 py-2 text-xs resize-none focus:outline-none focus:ring-1 focus:ring-ring"
-              rows={4}
-              aria-label={lang === "de" ? "Straßenbeschreibung" : "Street description"}
-              placeholder={
-                lang === "de"
-                  ? "Eine ruhige Wohnstraße mit breiten Gehwegen, Bäumen und einem geschützten Radweg auf jeder Seite…"
-                  : "A calm residential street with wide sidewalks, trees, and a protected bike lane on each side…"
-              }
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              disabled={loading}
-            />
-            {error && <p className="text-xs text-destructive">{error}</p>}
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">
-                {lang === "de" ? "1 kostenlose Generierung pro Browser" : "1 free generation per browser"}
-              </span>
-              <Button
-                size="sm"
-                className="h-7 text-xs"
-                onClick={handleGenerate}
-                disabled={loading || !prompt.trim()}
-              >
-                {loading ? (
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
-                    {lang === "de" ? "Generiere…" : "Generating…"}
-                  </span>
-                ) : (
-                  lang === "de" ? "Generieren →" : "Generate →"
-                )}
-              </Button>
-            </div>
-          </>
-        )}
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
+          {alreadyUsed ? (
+            <p className="text-xs text-muted-foreground">
+              {lang === "de"
+                ? "Du hast deine kostenlose Generierung bereits verwendet."
+                : "You've already used your free generation."}
+            </p>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground">
+                {lang === "de"
+                  ? "Beschreibe eine Straße und die KI generiert den Querschnitt automatisch."
+                  : "Describe a street and the AI will generate the cross-section automatically."}
+              </p>
+              <textarea
+                className="w-full rounded border border-input bg-background px-3 py-2 text-xs resize-none focus:outline-none focus:ring-1 focus:ring-ring"
+                rows={5}
+                aria-label={lang === "de" ? "Straßenbeschreibung" : "Street description"}
+                placeholder={
+                  lang === "de"
+                    ? "Eine ruhige Wohnstraße mit breiten Gehwegen, Bäumen und einem geschützten Radweg auf jeder Seite…"
+                    : "A calm residential street with wide sidewalks, trees, and a protected bike lane on each side…"
+                }
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                disabled={loading}
+              />
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground">
+                  {lang === "de" ? "1 kostenlose Generierung pro Browser" : "1 free generation per browser"}
+                </span>
+                <Button
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={handleGenerate}
+                  disabled={loading || !prompt.trim()}
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                      {lang === "de" ? "Generiere…" : "Generating…"}
+                    </span>
+                  ) : (
+                    lang === "de" ? "Generieren →" : "Generate →"
+                  )}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

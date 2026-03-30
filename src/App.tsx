@@ -18,6 +18,7 @@ import type { Lang } from "./i18n";
 import type { MapLayer, MapMode } from "./models/explore";
 import type { WfsLayer } from "./models/wfs";
 import { DEFAULT_WFS_LAYERS } from "./models/wfs";
+import { AIModal } from "./components/AIModal";
 import { WelcomeModal } from "./components/WelcomeModal";
 import { TourTooltip, TOUR_STEPS } from "./components/TourTooltip";
 import { getDefaultFigureVariant } from "./figures/registry";
@@ -76,6 +77,7 @@ export default function App() {
   const [mapVisible,    setMapVisible]    = useState(false);
   const [showAllFigures, setShowAllFigures] = useState(true);
   const [theme,         setTheme]          = useState<ThemeFlags>(DEFAULT_THEME_FLAGS);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState<boolean>(
     () => !localStorage.getItem(TOUR_KEY)
   );
@@ -181,7 +183,7 @@ export default function App() {
         {/* Mobile: single-column scroll stack (CrossSection → Sidebar → Map).
             Desktop: two-column grid — sidebar left spanning both rows,
             CrossSection top-right, Map bottom-right. */}
-        <div className="flex-1 grid grid-cols-1 overflow-y-auto lg:h-full lg:grid-cols-[24rem_1fr] lg:grid-rows-[1fr_1fr] lg:overflow-hidden">
+        <div className={`flex-1 grid grid-cols-1 overflow-y-auto lg:h-full lg:grid-rows-[1fr_1fr] lg:overflow-hidden transition-[grid-template-columns] duration-200 ${aiPanelOpen ? "lg:grid-cols-[24rem_1fr_20rem]" : "lg:grid-cols-[24rem_1fr]"}`}>
 
           {/* CrossSection — row 1 on mobile (DOM order), top-right on desktop */}
           <div className={`min-h-64 overflow-hidden lg:min-h-0 lg:col-start-2 lg:row-start-1${!mapVisible ? " lg:row-span-2" : ""}`}>
@@ -195,7 +197,7 @@ export default function App() {
               onShare={handleShare}
               shareCopied={shareCopied}
               onClear={handleClear}
-              onAiGenerate={handleAiGenerate}
+              onAiOpen={() => setAiPanelOpen(true)}
               darkMode={darkMode}
             />
           </div>
@@ -230,6 +232,17 @@ export default function App() {
               onTemplateApply={handleTemplateApply}
             />
           </div>
+
+          {/* AI Panel — right column spanning both rows on desktop */}
+          {aiPanelOpen && (
+            <div className="hidden lg:block lg:col-start-3 lg:row-start-1 lg:row-span-2">
+              <AIModal
+                lang={lang}
+                onGenerate={(s) => { handleAiGenerate(s); setAiPanelOpen(false); }}
+                onClose={() => setAiPanelOpen(false)}
+              />
+            </div>
+          )}
 
           {/* Map — row 3 on mobile (DOM order), bottom-right on desktop */}
           {mapVisible && (

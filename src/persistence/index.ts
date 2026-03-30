@@ -1,4 +1,4 @@
-import type { StreetConfig, StreetElement, ElementType } from "../models/street";
+import type { StreetConfig, StreetElement } from "../models/street";
 import { TEMPLATES } from "../templates";
 
 const LS_KEY = "berlin-street-designer-street";
@@ -17,7 +17,7 @@ export function sanitizeStreet(raw: unknown): StreetConfig {
         .filter((e): e is Record<string, unknown> => !!e && typeof e === "object")
         .filter((e) => VALID_ELEMENT_TYPES.has(e.type as string))
         .map((e) => ({
-          ...(e as StreetElement),
+          ...(e as unknown as StreetElement),
           width_m: typeof e.width_m === "number" ? Math.min(Math.max(e.width_m, 0.1), 30) : 3,
         }))
     : [];
