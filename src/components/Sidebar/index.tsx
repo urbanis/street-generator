@@ -6,7 +6,7 @@ import type { MapLayer, MapMode } from "../../models/explore";
 import { ExploreTab } from "../tabs/ExploreTab";
 import type { TemplateOption } from "../../templates";
 import { DesignTab } from "../tabs/DesignTab";
-import { EvaluateTab } from "../tabs/EvaluateTab";
+// import { EvaluateTab } from "../tabs/EvaluateTab";
 import {
   SIDEBAR, TAB_BAR, TAB_BUTTON_ACTIVE, TAB_BUTTON_INACTIVE, TAB_CONTENT,
 } from "./styles";
@@ -46,7 +46,7 @@ export function Sidebar({
   highlightedIds, results, mapReference, onReferenceSet,
   onStreetGenerated, osmDisclaimer, onClearOsmDisclaimer,
   mapLayer, mapMode, onMapLayerChange, onMapModeChange,
-  onSectionLineChange, onMeasurePointsChange, onRegisterMapClick, onOpenDocs,
+  onSectionLineChange, onMeasurePointsChange, onRegisterMapClick, // onOpenDocs,
   mapVisible, onToggleMap, onShowMap, onFitMap,
   templates, onTemplateApply,
 }: SidebarProps) {
