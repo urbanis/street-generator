@@ -55,6 +55,7 @@ const TRANSLATIONS = {
     // Map / Explore
     searchPlaceholder: "Adresse oder Ort suchen…",
     mapStreet: "Straße",
+    mapVoyager: "Voyager",
     mapSatellite: "Satellit",
     basemapsLabel: "Grundkarten",
     toolsLabel: "Werkzeuge",
@@ -156,6 +157,7 @@ const TRANSLATIONS = {
     themeOutlineMeasure:     "Outline + measurements",
     searchPlaceholder: "Search address or place…",
     mapStreet: "Street",
+    mapVoyager: "Voyager",
     mapSatellite: "Satellite",
     basemapsLabel: "Basemaps",
     toolsLabel: "Tools",

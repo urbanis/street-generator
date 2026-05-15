@@ -8,6 +8,21 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
 const AI_USED_KEY = "berlin-street-designer-ai-used";
+
+function friendlyError(raw: string, lang: "de" | "en"): string {
+  const de = lang === "de";
+  if (raw.includes("401"))           return de ? "API-Schlüssel ungültig oder abgelaufen." : "AI service key is invalid or expired.";
+  if (raw.includes("429"))           return de ? "Zu viele Anfragen. Bitte kurz warten und erneut versuchen." : "Too many requests. Wait a moment and try again.";
+  if (raw.includes("Service not configured")) return de ? "KI-Dienst ist noch nicht eingerichtet." : "AI service is not configured yet.";
+  if (raw.includes("Upstream error") || raw.includes("503") || raw.includes("502"))
+                                     return de ? "KI-Dienst vorübergehend nicht verfügbar. Bitte später erneut versuchen." : "AI service is temporarily unavailable. Try again later.";
+  if (raw.includes("404"))           return de ? "API-Endpunkt nicht gefunden." : "AI endpoint not found.";
+  if (raw.includes("No JSON"))       return de ? "Die KI hat keinen gültigen Straßenquerschnitt zurückgegeben. Beschreibung ändern und erneut versuchen." : "The AI didn't return a valid street. Try rephrasing your description.";
+  if (raw.includes("No valid elements")) return de ? "Die KI konnte aus dieser Beschreibung keine Straße erzeugen. Bitte genauer beschreiben." : "The AI couldn't build a street from that description. Try being more specific.";
+  if (raw.includes("parse") || raw.includes("JSON")) return de ? "Unerwartetes Antwortformat. Bitte erneut versuchen." : "Unexpected response format. Please try again.";
+  return de ? "Generierung fehlgeschlagen. Bitte erneut versuchen." : "Generation failed. Please try again.";
+}
+
 const VALID_TYPES = new Set<ElementType>([
   "SIDEWALK","CYCLE_LANE","CYCLE_LANE_ROAD","BUFFER","PARKING_LANE",
   "TRAFFIC_LANE","BUS_LANE","MEDIAN","PLANTING_STRIP","BUILDING_LEFT","BUILDING_RIGHT",
@@ -36,7 +51,14 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: prompt.trim() }),
       });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
+      if (!res.ok) {
+        let errMsg = `API error ${res.status}`;
+        try {
+          const errData = await res.json() as { error?: string };
+          if (errData.error) errMsg = errData.error;
+        } catch { /* ignore parse failure */ }
+        throw new Error(errMsg);
+      }
       const data = await res.json();
       const raw  = data.choices?.[0]?.message?.content ?? "";
 
@@ -76,9 +98,9 @@ export function AIModal({ lang, onGenerate, onClose }: AIModalProps) {
       onGenerate(street);
     } catch (e) {
       console.error("[AIModal] caught:", e);
-      const msg = e instanceof Error ? e.message : String(e);
-      capture("ai_generated", { success: false, error: msg });
-      setError(msg || (lang === "de" ? "Fehler beim Generieren." : "Generation failed."));
+      const raw = e instanceof Error ? e.message : String(e);
+      capture("ai_generated", { success: false, error: raw });
+      setError(friendlyError(raw, lang));
     } finally {
       setLoading(false);
     }

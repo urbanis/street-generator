@@ -7,10 +7,12 @@ import type { WfsLayer, WfsFeatureType } from "../../models/wfs";
 import { MAP_PANEL } from "./styles";
 import "leaflet/dist/leaflet.css";
 
-const OSM_URL  = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-const SAT_URL  = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-const SAT_ATTR = "Tiles &copy; Esri &mdash; Esri, Maxar, Earthstar Geographics";
+const OSM_URL      = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const OSM_ATTR     = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+const SAT_URL      = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+const SAT_ATTR     = "Tiles &copy; Esri &mdash; Esri, Maxar, Earthstar Geographics";
+const CARTODB_URL  = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+const CARTODB_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 function MapInvalidator() {
   const map = useMap();
@@ -234,6 +236,8 @@ export function MapPanel({
       >
         {mapLayer === "satellite" ? (
           <TileLayer attribution={SAT_ATTR} url={SAT_URL} />
+        ) : mapLayer === "cartodb" ? (
+          <TileLayer attribution={CARTODB_ATTR} url={CARTODB_URL} subdomains="abcd" />
         ) : (
           <TileLayer attribution={OSM_ATTR} url={OSM_URL} />
         )}

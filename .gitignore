@@ -26,4 +26,5 @@ dist-ssr
 .env
 
 .doc
-docs/plans/notes.md.worktrees/
+.worktrees/
+docs/plans/

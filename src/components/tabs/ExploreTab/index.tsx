@@ -64,6 +64,7 @@ export function ExploreTab({
   const measurePtsRef                       = useRef<[number, number][]>([]);
   const [measureDist,    setMeasureDist]    = useState(0);
   const [inspectResult,  setInspectResult]  = useState<InspectResult | null>(null);
+  const [inspectNoData,  setInspectNoData]  = useState(false);
   const [tagsExpanded,   setTagsExpanded]   = useState(false);
   const [inspecting,     setInspecting]     = useState(false);
 
@@ -142,8 +143,10 @@ export function ExploreTab({
       const tags = await fetchOsmStreetAt(lat, lng);
       if (!tags) {
         setInspectResult(null);
+        setInspectNoData(true);
         return;
       }
+      setInspectNoData(false);
       const rawTags = Object.fromEntries(
         Object.entries(tags).filter(([, v]) => v !== undefined) as [string, string][]
       );
@@ -196,15 +199,6 @@ export function ExploreTab({
     return () => { onRegisterMapClick(null); };
   }, [mapMode, handleMapClick, onRegisterMapClick]);
 
-  // Auto-generate when section has 2 points
-  useEffect(() => {
-    if (sectionPoints.length === 2 && mapMode === "mark-section") {
-      const midLat = (sectionPoints[0][0] + sectionPoints[1][0]) / 2;
-      const midLng = (sectionPoints[0][1] + sectionPoints[1][1]) / 2;
-      onReferenceSet({ lat: midLat, lng: midLng, zoom: 17, label: "Section midpoint" });
-      handleGenerate(midLat, midLng);
-    }
-  }, [sectionPoints]);
 
   // ── Mode toggle ───────────────────────────────────────────────────────────
 
@@ -213,9 +207,10 @@ export function ExploreTab({
     const next = mapMode === mode ? "none" : mode;
     if (next !== "none") capture("tool_activated", { tool: next });
     onMapModeChange(next);
+    setOsmError(null);
     if (next !== "mark-section") { setSectionPoints([]); onSectionLineChange(undefined); }
     if (next !== "measure")      { measurePtsRef.current = []; onMeasurePointsChange(undefined); setMeasureDist(0); }
-    if (next !== "inspect")      { setInspectResult(null); }
+    if (next !== "inspect")      { setInspectResult(null); setInspectNoData(false); }
   }
 
   const TOOLS: { mode: MapMode; icon: ReactNode; name: string; description: string }[] = [
@@ -304,6 +299,12 @@ export function ExploreTab({
             {t("mapStreet")}
           </button>
           <button
+            className={mapLayer === "cartodb" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
+            onClick={() => onMapLayerChange("cartodb")}
+          >
+            {t("mapVoyager")}
+          </button>
+          <button
             className={mapLayer === "satellite" ? MODE_BUTTON_ACTIVE : MODE_BUTTON_INACTIVE}
             onClick={() => onMapLayerChange("satellite")}
           >
@@ -345,9 +346,13 @@ export function ExploreTab({
           {/* Mark-section hint */}
           {mapMode === "mark-section" && (
             <p className="text-xs text-muted-foreground">
-              {lang === "de"
-                ? `${sectionPoints.length}/2 Punkte gesetzt. Klicke auf die Karte.`
-                : `${sectionPoints.length}/2 points set. Click on the map.`}
+              {sectionPoints.length < 2
+                ? (lang === "de"
+                    ? `${sectionPoints.length}/2 Punkte gesetzt. Klicke auf die Karte.`
+                    : `${sectionPoints.length}/2 points set. Click on the map.`)
+                : (lang === "de"
+                    ? "Linie gesetzt. Generieren bestätigen?"
+                    : "Line set. Confirm to generate?")}
             </p>
           )}
 
@@ -369,6 +374,11 @@ export function ExploreTab({
           {/* Inspect loading */}
           {mapMode === "inspect" && inspecting && (
             <div className="text-xs text-muted-foreground">…</div>
+          )}
+
+          {/* Inspect no data */}
+          {mapMode === "inspect" && !inspecting && inspectNoData && (
+            <p className="text-xs text-muted-foreground">{t("inspectNoData")}</p>
           )}
 
           {/* Inspect results */}
@@ -537,8 +547,25 @@ export function ExploreTab({
         <Button
           size="sm"
           className="h-8 text-xs flex-1"
-          onClick={() => mapMode === "inspect" && inspectResult ? handleGenerateFromInspect() : handleGenerate()}
-          disabled={generating || mapMode === "mark-section" || (mapMode === "inspect" ? !inspectResult : !mapReference)}
+          onClick={() => {
+            if (mapMode === "inspect" && inspectResult) {
+              handleGenerateFromInspect();
+            } else if (mapMode === "mark-section" && sectionPoints.length === 2) {
+              const midLat = (sectionPoints[0][0] + sectionPoints[1][0]) / 2;
+              const midLng = (sectionPoints[0][1] + sectionPoints[1][1]) / 2;
+              onReferenceSet({ lat: midLat, lng: midLng, zoom: 17, label: "Section midpoint" });
+              handleGenerate(midLat, midLng);
+            } else {
+              handleGenerate();
+            }
+          }}
+          disabled={
+            generating ||
+            (mapMode === "mark-section" && sectionPoints.length < 2) ||
+            (mapMode === "inspect" && !inspectResult) ||
+            (mapMode === "measure") ||
+            (mapMode === "none" && !mapReference)
+          }
         >
           {generating ? "…" : t("generateSection")}
         </Button>
