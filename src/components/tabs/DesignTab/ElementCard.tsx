@@ -72,6 +72,7 @@ export function ElementCard({
   return (
     <div
       ref={cardRef}
+      data-testid="element-card"
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDrop={onDrop}

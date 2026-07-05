@@ -25,6 +25,11 @@ dist-ssr
 
 .env
 
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
 .doc
 .worktrees/
 docs/plans/

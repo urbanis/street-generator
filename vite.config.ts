@@ -1,5 +1,5 @@
 import path from "path";
-import { defineConfig } from "vitest/config";
+import { defineConfig, configDefaults } from "vitest/config";
 import { loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
@@ -70,6 +70,8 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       environment: "node",
+      // Ignore git worktrees — they hold in-progress branches with their own tests.
+      exclude: [...configDefaults.exclude, "**/.worktrees/**"],
     },
   };
 });
