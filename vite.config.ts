@@ -70,8 +70,9 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       environment: "node",
-      // Ignore git worktrees — they hold in-progress branches with their own tests.
-      exclude: [...configDefaults.exclude, "**/.worktrees/**"],
+      // Ignore git worktrees (in-progress branches) and the Playwright e2e specs,
+      // which run under Playwright's own runner, not vitest.
+      exclude: [...configDefaults.exclude, "**/.worktrees/**", "**/e2e/**"],
     },
   };
 });
