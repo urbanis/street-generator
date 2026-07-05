@@ -33,3 +33,4 @@ dist-ssr
 .doc
 .worktrees/
 docs/plans/
+.claude/
