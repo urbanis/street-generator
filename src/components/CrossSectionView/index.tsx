@@ -115,6 +115,14 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
     return type === "TRAFFIC_LANE" || type === "PARKING_LANE" || type === "BUS_LANE" || type === "CYCLE_LANE_ROAD";
   }
 
+  function fit() {
+    if (!wrapRef.current || W === 0) return;
+    const { clientWidth, clientHeight } = wrapRef.current;
+    const padding = 32;
+    const z = Math.min((clientWidth - padding) / W, (clientHeight - padding) / SVG_H);
+    setZoom(Math.max(0.1, Math.min(z, 5)));
+  }
+
   useEffect(() => {
     if (!wrapRef.current) return;
     const ro = new ResizeObserver(() => fit());
@@ -157,14 +165,6 @@ export function CrossSectionView({ street, showAllFigures, onShowAllFiguresChang
   function handlePanEnd() {
     setIsPanning(false);
     panStartRef.current = null;
-  }
-
-  function fit() {
-    if (!wrapRef.current || W === 0) return;
-    const { clientWidth, clientHeight } = wrapRef.current;
-    const padding = 32;
-    const z = Math.min((clientWidth - padding) / W, (clientHeight - padding) / SVG_H);
-    setZoom(Math.max(0.1, Math.min(z, 5)));
   }
 
   async function inlineImages(svgEl: SVGSVGElement): Promise<void> {

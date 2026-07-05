@@ -187,6 +187,9 @@ export function ExploreTab({
     } else if (mapMode === "inspect") {
       handleInspect(lat, lng);
     }
+    // handleInspect omitted intentionally — including it would re-register the
+    // map click handler on every render; its behavior is keyed off mapMode.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapMode, onSectionLineChange, onMeasurePointsChange]);
 
   // Register/unregister click handler with App

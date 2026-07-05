@@ -158,7 +158,7 @@ Anonymous usage analytics via **PostHog** (EU servers, GDPR-compliant). No perso
 
 | Layer | Choice |
 |---|---|
-| Framework | React 18 + TypeScript + Vite |
+| Framework | React 19 + TypeScript + Vite |
 | Styling | Tailwind CSS + shadcn/ui (Radix primitives) |
 | Map | Leaflet + OpenStreetMap tiles |
 | LLM inference | Groq API — `llama-3.1-8b-instant` |

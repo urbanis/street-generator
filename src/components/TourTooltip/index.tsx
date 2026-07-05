@@ -44,7 +44,6 @@ export function TourTooltip({ step, total, lang, onNext, onBack, onExit }: TourT
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let rafId: number;
     function position() {
       const target = document.querySelector(`[data-tour="${current.target}"]`);
       if (!target || !tooltipRef.current) {
@@ -98,7 +97,7 @@ export function TourTooltip({ step, total, lang, onNext, onBack, onExit }: TourT
         arrowLeft,
       });
     }
-    rafId = requestAnimationFrame(position);
+    const rafId = requestAnimationFrame(position);
     window.addEventListener("resize", position);
     return () => {
       cancelAnimationFrame(rafId);

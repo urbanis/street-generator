@@ -52,7 +52,7 @@ export function PrivacyModal({ lang }: PrivacyModalProps) {
 
               <div>
                 <p className="font-medium text-foreground mb-1">Anonyme Nutzungsanalyse</p>
-                <p>Wir verwenden <strong>PostHog</strong> (EU-Server, DSGVO-konform) für anonyme Nutzungsstatistiken. Es werden keine personenbezogenen Daten, keine Straßeninhalte und keine Standortdaten erfasst. IP-Adressen werden standardmäßig anonymisiert. Es werden keine Cookies gesetzt.</p>
+                <p>Wir verwenden <strong>PostHog</strong> (EU-Server, DSGVO-konform) für anonyme Nutzungsstatistiken. Es werden keine personenbezogenen Daten, keine Straßeninhalte und keine Standortdaten erfasst. IP-Adressen werden anonymisiert. Es werden keine Cookies gesetzt und keine sitzungsübergreifende Verfolgung durchgeführt — alle Analysedaten existieren nur im Arbeitsspeicher und werden beim Schließen der Seite gelöscht.</p>
               </div>
 
               <div>
@@ -90,7 +90,7 @@ export function PrivacyModal({ lang }: PrivacyModalProps) {
                 <p>Bei Fragen: <a href="mailto:info@streetgenerator.com" className="underline">info@streetgenerator.com</a></p>
               </div>
 
-              <p className="text-[10px] text-muted-foreground/60">Zuletzt aktualisiert: März 2026</p>
+              <p className="text-[10px] text-muted-foreground/60">Zuletzt aktualisiert: Mai 2026</p>
             </div>
           ) : (
             <div className="text-xs text-muted-foreground space-y-3">
@@ -98,7 +98,7 @@ export function PrivacyModal({ lang }: PrivacyModalProps) {
 
               <div>
                 <p className="font-medium text-foreground mb-1">Anonymous usage analytics</p>
-                <p>We use <strong>PostHog</strong> (EU servers, GDPR-compliant) for anonymous usage statistics. No personal data, no street content, and no location data is collected. IP addresses are anonymised by default. No cookies are set.</p>
+                <p>We use <strong>PostHog</strong> (EU servers, GDPR-compliant) for anonymous usage statistics. No personal data, no street content, and no location data is collected. IP addresses are anonymised. No cookies are set and no cross-session tracking occurs — all analytics data lives only in memory and is discarded when you close the page.</p>
               </div>
 
               <div>
@@ -136,7 +136,7 @@ export function PrivacyModal({ lang }: PrivacyModalProps) {
                 <p>For any privacy questions: <a href="mailto:info@streetgenerator.com" className="underline">info@streetgenerator.com</a></p>
               </div>
 
-              <p className="text-[10px] text-muted-foreground/60">Last updated: March 2026</p>
+              <p className="text-[10px] text-muted-foreground/60">Last updated: May 2026</p>
             </div>
           )}
         </div>
