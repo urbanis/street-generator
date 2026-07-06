@@ -12,6 +12,13 @@ test.describe("Design tab — adding a street element", () => {
     await welcome.getByRole("button", { name: "EN", exact: true }).click();
     await welcome.getByRole("button", { name: /skip tour/i }).click();
 
+    // The MCP announcement modal appears once after the welcome; dismiss it so
+    // its backdrop doesn't intercept clicks.
+    await page
+      .getByRole("dialog", { name: /Street Generator MCP/i })
+      .getByRole("button", { name: "Got it" })
+      .click();
+
     // The design tab is active by default. A default street is pre-loaded,
     // so some element cards already exist — count them first.
     const cards = page.getByTestId("element-card");
