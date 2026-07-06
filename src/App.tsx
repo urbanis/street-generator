@@ -20,12 +20,14 @@ import type { WfsLayer } from "./models/wfs";
 import { DEFAULT_WFS_LAYERS } from "./models/wfs";
 import { AIModal } from "./components/AIModal";
 import { WelcomeModal } from "./components/WelcomeModal";
+import { MCPModal } from "./components/MCPModal";
 import { TourTooltip, TOUR_STEPS } from "./components/TourTooltip";
 import { getDefaultFigureVariant } from "./figures/registry";
 
 const LANG_KEY = "berlin-street-designer-lang";
 const TOUR_KEY = "berlin-street-designer-tour-done";
 const DARK_KEY = "berlin-street-designer-dark";
+const MCP_KEY = "berlin-street-designer-mcp-announced";
 
 function withDefaultFigures(config: StreetConfig): StreetConfig {
   return {
@@ -82,6 +84,7 @@ export default function App() {
     () => !localStorage.getItem(TOUR_KEY)
   );
   const [tourStep, setTourStep] = useState<number | null>(null);
+  const [showMcp, setShowMcp] = useState(false);
 
   useEffect(() => { saveToLocalStorage(street); }, [street]);
   useEffect(() => { localStorage.setItem(LANG_KEY, lang); }, [lang]);
@@ -96,6 +99,13 @@ export default function App() {
     const tab = TOUR_STEPS[tourStep].tab;
     if (tab) setActiveTab(tab);
   }, [tourStep]);
+
+  // Announce the MCP once, after any first-visit welcome/tour has finished
+  useEffect(() => {
+    if (!localStorage.getItem(MCP_KEY) && !showWelcome && tourStep === null) {
+      setShowMcp(true);
+    }
+  }, [showWelcome, tourStep]);
 
   function handleShare() {
     const url = encodeStreetToUrl(street);
@@ -166,6 +176,11 @@ export default function App() {
     localStorage.removeItem(TOUR_KEY);
     setTourStep(null);
     setShowWelcome(true);
+  }
+
+  function handleMcpClose() {
+    localStorage.setItem(MCP_KEY, "1");
+    setShowMcp(false);
   }
 
   return (
@@ -284,6 +299,7 @@ export default function App() {
           onExit={handleTourExit}
         />
       )}
+      {showMcp && <MCPModal lang={lang} onClose={handleMcpClose} />}
     </LangProvider>
   );
 }
